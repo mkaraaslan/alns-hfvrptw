@@ -40,7 +40,7 @@
 \vspace{1.5em}
 
 \begin{abstract}
-The Heterogeneous Fleet Vehicle Routing Problem with Time Windows (HFVRPTW) is a generalization of the classical VRPTW in which a depot dispatches a limited fleet composed of multiple vehicle types with different capacities and cost structures. Larger vehicles have higher fixed costs but lower per-distance costs, making them economical for consolidated long routes, whereas smaller vehicles offer flexibility for low-demand or geographically scattered customers. This work presents an Adaptive Large Neighborhood Search (ALNS) metaheuristic tailored to the HFVRPTW. The algorithm employs multiple problem-specific destroy and repair operators (random, worst, Shaw/related, route, and vehicle-type-aware removals together with greedy, regret-$k$, and vehicle-type-aware insertions), an adaptive operator selection mechanism based on roulette-wheel weighting and historical performance scores, and a simulated-annealing-style acceptance criterion. The algorithm is evaluated on Solomon-derived heterogeneous fleet benchmark instances, focusing on solution quality, robustness, and operator behavior. The work contributes to the metaheuristic literature by providing a comprehensive ALNS design and analysis for the HFVRPTW with detailed algorithmic choices, parameter settings, and reproducible experimental protocols.
+The Heterogeneous Fleet Vehicle Routing Problem with Time Windows (HFVRPTW) is a generalization of the classical VRPTW in which a depot dispatches a limited fleet composed of multiple vehicle types with different capacities and cost structures. Larger vehicles have higher fixed costs but lower per-distance costs, making them economical for consolidated long routes, whereas smaller vehicles offer flexibility for low-demand or geographically scattered customers. This work presents an Adaptive Large Neighborhood Search (ALNS) metaheuristic tailored to the HFVRPTW. The algorithm employs multiple problem-specific destroy and repair operators (random, worst, Shaw/related, route, and vehicle-type-aware removals together with greedy, regret-$k$, and vehicle-type-aware insertions), an adaptive operator selection mechanism based on roulette-wheel weighting and historical performance scores, and a simulated-annealing-style acceptance criterion. The algorithm is evaluated on Solomon-derived heterogeneous fleet benchmark instances, focusing on solution quality, robustness, and operator behavior. The work contributes to the metaheuristic literature by providing a comprehensive ALNS design and analysis for the HFVRPTW with detailed algorithmic choices, parameter settings, and reproducible experimental protocols. The complete implementation, benchmark data, and experimental scripts are publicly available at \url{https://github.com/mkaraaslan/alns-hfvrptw}.
 \end{abstract}
 
 \noindent\textbf{Keywords:} Heterogeneous Fleet Vehicle Routing Problem with Time Windows (HFVRPTW); Adaptive Large Neighborhood Search (ALNS); Metaheuristics; Destroy and Repair Operators; Roulette-Wheel Selection; Simulated Annealing Acceptance; Mixed Fleet; Combinatorial Optimization; Solomon Benchmark; Freight Distribution; Last-Mile Delivery.
@@ -796,6 +796,35 @@ This work presented a comprehensive Adaptive Large Neighborhood Search (ALNS) me
     \item \textbf{Richer fleet models:} Extensions to three or more vehicle types, electric vehicles with range constraints, or time-dependent travel times would increase practical applicability.
     \item \textbf{Machine learning integration:} Learning-based operator selection or initial solution generation could further improve convergence speed.
 \end{itemize}
+
+\section*{Code Availability}
+
+The complete source code, benchmark instances, experimental scripts, and all generated results (plots, JSON summaries, \LaTeX\ tables) are publicly available on GitHub:
+
+\begin{center}
+\url{https://github.com/mkaraaslan/alns-hfvrptw}
+\end{center}
+
+\noindent The repository includes:
+\begin{itemize}[leftmargin=*]
+    \item \texttt{src/} --- Core ALNS implementation (instance parser, solution model, constructors, operators, main loop, baselines).
+    \item \texttt{data/} --- Solomon C20 and R20 instance files.
+    \item \texttt{run\_final.py} --- Final ALNS run with tuned parameters.
+    \item \texttt{benchmark.py} --- ALNS vs.\ alternative heuristics comparison.
+    \item \texttt{parameter\_tuning.py} --- Sensitivity analysis script.
+    \item \texttt{generate\_report.py} --- Automated \LaTeX\ table and summary generator.
+    \item \texttt{results/} --- All plots, JSON data, and generated tables.
+    \item \texttt{report.tex} --- This report (compilable with pdf\LaTeX).
+\end{itemize}
+
+\noindent To reproduce all results:
+\begin{verbatim}
+pip install -r requirements.txt
+python run_final.py
+python benchmark.py
+python parameter_tuning.py
+python generate_report.py
+\end{verbatim}
 
 \section*{References}
 
