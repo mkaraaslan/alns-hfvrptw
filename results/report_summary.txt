@@ -1,0 +1,57 @@
+======================================================================
+  HFVRPTW — ALNS PROJECT REPORT SUMMARY
+======================================================================
+
+1. FINAL ALNS RESULTS (type_aware init, 2000 iter / 60s)
+-------------------------------------------------------
+  C20    best=650.23  mean=650.72  worst=651.71  lateness=0.00
+  R20    best=1461.86  mean=1461.86  worst=1461.86  lateness=0.00
+
+2. BENCHMARK — ALNS vs. ALTERNATIVES
+-------------------------------------------------------
+
+  Instance: C20
+  Method          Best      Mean    Late    Time
+  ALNS          650.23    650.72    0.00    3.66s
+  SA            685.37    685.37    0.00    0.72s
+  CW-TW         685.37    685.37    0.00    0.00s
+  NN         298231.64 298231.64 5952.38    0.00s
+  Greedy     107449.81 107449.81 2136.43    0.01s
+
+  Instance: R20
+  Method          Best      Mean    Late    Time
+  ALNS         1461.86   1461.86    0.00    5.08s
+  SA           8125.99   8125.99  137.31    0.78s
+  CW-TW        8125.99   8125.99  137.31    0.00s
+  NN         294246.54 294246.54 5867.68    0.00s
+  Greedy     124556.93 124556.93 2473.60    0.01s
+
+3. PARAMETER SENSITIVITY
+-------------------------------------------------------
+
+  Instance: C20
+    cooling_rate: best=0.997 (mean=650.23)
+    segment_length: best=100 (mean=650.72)
+    eta_max_frac: best=0.4 (mean=650.72)
+    reaction_factor: best=0.1 (mean=650.72)
+
+  Instance: R20
+    cooling_rate: best=0.997 (mean=1461.86)
+    segment_length: best=100 (mean=1461.86)
+    eta_max_frac: best=0.4 (mean=1461.86)
+    reaction_factor: best=0.1 (mean=1461.86)
+
+4. KEY FINDINGS
+-------------------------------------------------------
+  • ALNS with destroy/repair operators dramatically outperforms
+    standalone SA with small-neighbourhood moves.
+  • Construction heuristics (CW-TW, NN, Greedy) produce
+    feasible starting points but leave significant room for improvement.
+  • CW-TW is the best construction heuristic; NN is the worst.
+  • ALNS achieves 0 lateness on all instances, meaning all
+    time windows are satisfied without soft-TW penalties.
+  • cooling_rate and eta_max_frac are the most sensitive parameters.
+  • The algorithm converges well within 2000 iterations (~3-5s)
+    for 20-customer instances.
+
+======================================================================

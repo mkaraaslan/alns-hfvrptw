@@ -1,0 +1,112 @@
+{
+  "instance": "R20",
+  "iterations": 8000,
+  "runtime_seconds": 20.186777114868164,
+  "final_cost": 1460.718260094356,
+  "vehicle_fixed_cost": 800.0,
+  "distance_cost": 660.7182600943562,
+  "total_lateness": 0.0,
+  "lateness_penalty_per_unit": 50.0,
+  "vehicles_used_L": 2,
+  "vehicles_used_S": 4,
+  "fleet_limits": {
+    "m_L": 3,
+    "m_S": 4
+  },
+  "routes": [
+    {
+      "type": "S",
+      "customers": [
+        5,
+        16,
+        6,
+        13
+      ],
+      "load": 71.0,
+      "distance": 68.07503209227163,
+      "lateness": 0.0
+    },
+    {
+      "type": "L",
+      "customers": [
+        14,
+        15,
+        3,
+        4
+      ],
+      "load": 60.0,
+      "distance": 144.99691514828916,
+      "lateness": 0.0
+    },
+    {
+      "type": "S",
+      "customers": [
+        11,
+        19,
+        10
+      ],
+      "load": 45.0,
+      "distance": 81.10718504232625,
+      "lateness": 0.0
+    },
+    {
+      "type": "L",
+      "customers": [
+        12,
+        9,
+        20,
+        1
+      ],
+      "load": 54.0,
+      "distance": 83.39940616966133,
+      "lateness": 0.0
+    },
+    {
+      "type": "S",
+      "customers": [
+        7,
+        8,
+        17
+      ],
+      "load": 16.0,
+      "distance": 77.76195998000534,
+      "lateness": 0.0
+    },
+    {
+      "type": "S",
+      "customers": [
+        2,
+        18
+      ],
+      "load": 19.0,
+      "distance": 61.27044873633386,
+      "lateness": 0.0
+    }
+  ],
+  "destroy_usage": {
+    "random": 1573,
+    "worst": 1599,
+    "shaw": 1587,
+    "route": 1625,
+    "type_aware": 1616
+  },
+  "repair_usage": {
+    "greedy": 2000,
+    "regret-2": 2008,
+    "regret-3": 2001,
+    "type_aware": 1991
+  },
+  "destroy_scores_total": {
+    "random": 18265.0,
+    "worst": 18258.0,
+    "shaw": 18399.0,
+    "route": 18722.0,
+    "type_aware": 19031.0
+  },
+  "repair_scores_total": {
+    "greedy": 23661.0,
+    "regret-2": 22694.0,
+    "regret-3": 22756.0,
+    "type_aware": 23564.0
+  }
+}

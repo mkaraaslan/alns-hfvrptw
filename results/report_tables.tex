@@ -1,0 +1,78 @@
+% Auto-generated LaTeX tables for HFVRPTW ALNS project
+% Include this file with \input{report_tables.tex}
+
+\begin{table}[htbp]
+\centering
+\caption{Final ALNS Results (type\_aware init, 2000 iter / 60s)}
+\label{tab:final}
+\begin{tabular}{l rrr rrr}
+\toprule
+Instance & Best & Mean & Worst & Lateness & L & S \\
+\midrule
+C20 & 650.23 & 650.72 & 651.71 & 0.00 & 1 & 2 \\
+R20 & 1461.86 & 1461.86 & 1461.86 & 0.00 & 2 & 4 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[htbp]
+\centering
+\caption{Benchmark: ALNS vs.\ Alternative Heuristics}
+\label{tab:benchmark}
+\begin{tabular}{ll rrr rr}
+\toprule
+Instance & Method & Best & Mean & Worst & Lateness & Time (s) \\
+\midrule
+C20 & ALNS & \textbf{650.23} & 650.72 & 651.71 & 0.00 & 3.66 \\
+ & SA & 685.37 & 685.37 & 685.37 & 0.00 & 0.72 \\
+ & CW-TW & 685.37 & 685.37 & 685.37 & 0.00 & 0.00 \\
+ & NN & 298231.64 & 298231.64 & 298231.64 & 5952.38 & 0.00 \\
+ & Greedy & 107449.81 & 107449.81 & 107449.81 & 2136.43 & 0.01 \\
+\midrule
+R20 & ALNS & \textbf{1461.86} & 1461.86 & 1461.86 & 0.00 & 5.08 \\
+ & SA & 8125.99 & 8125.99 & 8125.99 & 137.31 & 0.78 \\
+ & CW-TW & 8125.99 & 8125.99 & 8125.99 & 137.31 & 0.00 \\
+ & NN & 294246.54 & 294246.54 & 294246.54 & 5867.68 & 0.00 \\
+ & Greedy & 124556.93 & 124556.93 & 124556.93 & 2473.60 & 0.01 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[htbp]
+\centering
+\caption{Parameter Sensitivity Analysis}
+\label{tab:tuning}
+\begin{tabular}{ll rrr}
+\toprule
+Instance & Parameter = Value & Best & Mean & Worst \\
+\midrule
+C20 & cooling\_rate = 0.995 & 650.23 & 666.13 & 697.93 \\
+ & cooling\_rate = 0.997 & 650.23 & 650.23 & 650.23 \\
+ & cooling\_rate = 0.998 & 650.23 & 650.72 & 651.71 \\
+ & cooling\_rate = 0.999 & 650.23 & 650.79 & 651.91 \\
+ & segment\_length = 50 & 650.23 & 651.42 & 652.32 \\
+ & segment\_length = 100 & 650.23 & 650.72 & 651.71 \\
+ & segment\_length = 200 & 650.23 & 650.72 & 651.71 \\
+ & eta\_max\_frac = 0.25 & 650.23 & 652.18 & 653.77 \\
+ & eta\_max\_frac = 0.4 & 650.23 & 650.72 & 651.71 \\
+ & eta\_max\_frac = 0.55 & 650.23 & 651.35 & 651.91 \\
+ & reaction\_factor = 0.05 & 650.23 & 650.79 & 651.91 \\
+ & reaction\_factor = 0.1 & 650.23 & 650.72 & 651.71 \\
+ & reaction\_factor = 0.2 & 650.23 & 650.79 & 651.91 \\
+\midrule
+R20 & cooling\_rate = 0.995 & 1461.86 & 1462.98 & 1463.54 \\
+ & cooling\_rate = 0.997 & 1461.86 & 1461.86 & 1461.86 \\
+ & cooling\_rate = 0.998 & 1461.86 & 1461.86 & 1461.86 \\
+ & cooling\_rate = 0.999 & 1460.72 & 1461.90 & 1463.13 \\
+ & segment\_length = 50 & 1461.86 & 1462.29 & 1463.13 \\
+ & segment\_length = 100 & 1461.86 & 1461.86 & 1461.86 \\
+ & segment\_length = 200 & 1460.72 & 1462.04 & 1463.54 \\
+ & eta\_max\_frac = 0.25 & 1460.72 & 1465.33 & 1471.72 \\
+ & eta\_max\_frac = 0.4 & 1461.86 & 1461.86 & 1461.86 \\
+ & eta\_max\_frac = 0.55 & 1460.72 & 1462.32 & 1463.13 \\
+ & reaction\_factor = 0.05 & 1461.86 & 1462.42 & 1463.54 \\
+ & reaction\_factor = 0.1 & 1461.86 & 1461.86 & 1461.86 \\
+ & reaction\_factor = 0.2 & 1461.86 & 1461.86 & 1461.86 \\
+\bottomrule
+\end{tabular}
+\end{table}

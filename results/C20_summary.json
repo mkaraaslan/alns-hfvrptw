@@ -1,0 +1,88 @@
+{
+  "instance": "C20",
+  "iterations": 8000,
+  "runtime_seconds": 14.007325887680054,
+  "final_cost": 650.231961509061,
+  "vehicle_fixed_cost": 400.0,
+  "distance_cost": 250.23196150906097,
+  "total_lateness": 0.0,
+  "lateness_penalty_per_unit": 50.0,
+  "vehicles_used_L": 1,
+  "vehicles_used_S": 2,
+  "fleet_limits": {
+    "m_L": 3,
+    "m_S": 4
+  },
+  "routes": [
+    {
+      "type": "L",
+      "customers": [
+        13,
+        17,
+        18,
+        19,
+        15,
+        16,
+        14,
+        12
+      ],
+      "load": 190.0,
+      "distance": 95.88470913081827,
+      "lateness": 0.0
+    },
+    {
+      "type": "S",
+      "customers": [
+        5,
+        3,
+        7,
+        8,
+        10
+      ],
+      "load": 70.0,
+      "distance": 41.32977896487195,
+      "lateness": 0.0
+    },
+    {
+      "type": "S",
+      "customers": [
+        20,
+        11,
+        9,
+        6,
+        4,
+        2,
+        1
+      ],
+      "load": 100.0,
+      "distance": 61.568389287289854,
+      "lateness": 0.0
+    }
+  ],
+  "destroy_usage": {
+    "random": 1665,
+    "worst": 1488,
+    "shaw": 1546,
+    "route": 1693,
+    "type_aware": 1608
+  },
+  "repair_usage": {
+    "greedy": 1983,
+    "regret-2": 1963,
+    "regret-3": 1970,
+    "type_aware": 2084
+  },
+  "destroy_scores_total": {
+    "random": 18947.0,
+    "worst": 16558.0,
+    "shaw": 17699.0,
+    "route": 19676.0,
+    "type_aware": 18395.0
+  },
+  "repair_scores_total": {
+    "greedy": 22997.0,
+    "regret-2": 21763.0,
+    "regret-3": 22310.0,
+    "type_aware": 24205.0
+  }
+}

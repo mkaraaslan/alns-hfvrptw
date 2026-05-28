@@ -1,0 +1,822 @@
+\documentclass[11pt]{article}
+
+\usepackage[margin=1in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage{hyperref}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{enumitem}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{pgfgantt}
+
+\begin{document}
+
+% ---------- Custom Title Block ----------
+\begin{center}
+{\noindent\rule{\textwidth}{2.5pt}}\\[0.35em]
+{\noindent\rule{\textwidth}{1pt}}\\[0.8em]
+{\Huge\bfseries An Adaptive Large Neighborhood Search Approach for the Heterogeneous Fleet Vehicle Routing Problem with Time Windows\par}
+\vspace{0.6em}
+{\large\bfseries Final Project Report\par}
+\vspace{0.2em}
+{\large\bfseries EMU676 Optimization Models and Algorithms in\\ Transportation and Distribution\par}
+\vspace{0.8em}
+{\noindent\rule{\textwidth}{1pt}}\\[0.35em]
+{\noindent\rule{\textwidth}{2.5pt}}
+\end{center}
+
+\vspace{1.5em}
+\begin{center}
+{\large Mert Karaaslan}\\[0.3em]
+{\normalsize \today}
+\end{center}
+
+\vspace{1.5em}
+
+\begin{abstract}
+The Heterogeneous Fleet Vehicle Routing Problem with Time Windows (HFVRPTW) is a generalization of the classical VRPTW in which a depot dispatches a limited fleet composed of multiple vehicle types with different capacities and cost structures. Larger vehicles have higher fixed costs but lower per-distance costs, making them economical for consolidated long routes, whereas smaller vehicles offer flexibility for low-demand or geographically scattered customers. This work presents an Adaptive Large Neighborhood Search (ALNS) metaheuristic tailored to the HFVRPTW. The algorithm employs multiple problem-specific destroy and repair operators (random, worst, Shaw/related, route, and vehicle-type-aware removals together with greedy, regret-$k$, and vehicle-type-aware insertions), an adaptive operator selection mechanism based on roulette-wheel weighting and historical performance scores, and a simulated-annealing-style acceptance criterion. The algorithm is evaluated on Solomon-derived heterogeneous fleet benchmark instances, focusing on solution quality, robustness, and operator behavior. The work contributes to the metaheuristic literature by providing a comprehensive ALNS design and analysis for the HFVRPTW with detailed algorithmic choices, parameter settings, and reproducible experimental protocols.
+\end{abstract}
+
+\noindent\textbf{Keywords:} Heterogeneous Fleet Vehicle Routing Problem with Time Windows (HFVRPTW); Adaptive Large Neighborhood Search (ALNS); Metaheuristics; Destroy and Repair Operators; Roulette-Wheel Selection; Simulated Annealing Acceptance; Mixed Fleet; Combinatorial Optimization; Solomon Benchmark; Freight Distribution; Last-Mile Delivery.
+
+\newpage
+\tableofcontents
+\newpage
+
+\section{Introduction}
+
+\subsection{Motivation and Background}
+
+Modern freight distribution and last-mile delivery operations face increasing pressure to optimize routing decisions while satisfying strict customer service requirements. The Vehicle Routing Problem with Time Windows (VRPTW) captures this operational reality by modeling the challenge of designing optimal delivery routes for a fleet of vehicles serving geographically dispersed customers, where each customer must be served within a specified time interval.
+
+The VRPTW is highly relevant to contemporary logistics operations for several reasons:
+\begin{itemize}[leftmargin=*]
+    \item \textbf{E-commerce growth:} The rapid expansion of online retail has intensified the need for efficient last-mile delivery with precise delivery time commitments.
+    \item \textbf{Customer service expectations:} Modern consumers demand narrow delivery windows, making time-window constraints a critical operational requirement.
+    \item \textbf{Operational efficiency:} Optimizing routes under time constraints directly impacts fuel costs, vehicle utilization, and driver productivity.
+    \item \textbf{Sustainability concerns:} Efficient routing reduces carbon emissions and supports environmental sustainability goals in urban logistics.
+\end{itemize}
+
+In realistic distribution settings, the carrier rarely operates a homogeneous fleet. Logistics providers commonly maintain a mixed fleet of vehicles with different capacities and cost structures: \emph{larger vehicles} (e.g., trucks) typically incur higher fixed costs (driver wages, insurance, depreciation) but offer lower per-distance operating costs and consolidate demand on long routes; \emph{smaller vehicles} (e.g., vans) have lower fixed costs and provide flexibility for low-demand or scattered customers but are more expensive per unit distance. The \emph{Heterogeneous Fleet Vehicle Routing Problem with Time Windows (HFVRPTW)} extends the VRPTW by explicitly modeling these multiple vehicle types, leading to the additional decision of selecting the appropriate vehicle type for each route. This generalization significantly expands the applicability of VRPTW models to realistic urban distribution settings but also makes the problem combinatorially harder.
+
+The VRPTW and its heterogeneous fleet generalization are strongly NP-hard combinatorial optimization problems, meaning that exact solution methods become computationally prohibitive for realistic problem sizes. This computational complexity necessitates the use of metaheuristic algorithms that can produce high-quality solutions in reasonable computational time.
+
+\subsection{Literature Review}
+
+The VRPTW has been extensively studied in the operations research and transportation literature since its introduction by Solomon (1987). The problem combines the complexity of vehicle routing with the additional challenge of time window constraints, making it one of the most studied variants of the VRP.
+
+\subsubsection{Exact Methods}
+
+A large body of exact methods for the VRPTW is based on \emph{column generation}. The foundational work of Desrochers, Desrosiers and Solomon (1992) introduced column generation within a Dantzig--Wolfe decomposition framework, while Halse (1992) proposed a decomposition based on variable splitting (also known as Lagrangean decomposition). Kohl and Madsen (1997) subsequently developed an algorithm exploiting Lagrangean relaxation.
+
+Building on these works, Kohl, Desrosiers, Madsen, Solomon and Soumis (1999), Larsen (1999), and Cook and Rich (1999) extended Dantzig--Wolfe-based decomposition algorithms by incorporating cutting planes and/or parallel computing platforms. Kallehauge (2000) proposed a hybrid algorithm combining Lagrangean relaxation with Dantzig--Wolfe decomposition.
+
+More recently, significant advances have been made in both the subproblem and master problem components of column generation. Enhanced subproblem methodologies have been developed by Chabrier (2005), Chabrier, Danna and Le Pape (2002), Feillet, Dejax, Gendreau and Gueguen (2004), Irnich and Villeneuve (2005), and Rousseau, Gendreau and Pesant (2004). Master problem approaches have been improved by Danna and Le Pape (2005) and Larsen (2004). Complementary advances include branch-and-cut methods incorporating valid inequalities (Kohl et al., 1999) and bidirectional dynamic programming approaches (Righini and Salani, 2006).
+
+While exact methods guarantee optimality, they remain computationally limited for large-scale instances, motivating the use of metaheuristics for realistic problem sizes.
+
+\subsubsection{Metaheuristic Approaches}
+
+Given the computational limitations of exact methods, metaheuristics have become the dominant approach for solving the VRPTW at realistic scales. The metaheuristic literature for the VRPTW can be broadly grouped into local search-based methods, population-based methods, and hybrid/adaptive approaches.
+
+\textbf{Local Search-Based Methods.} Early metaheuristic research for the VRPTW focused on neighborhood search strategies. Solomon (1987) introduced constructive insertion heuristics that served as the basis for most subsequent local search methods. Potvin and Rousseau (1993) proposed parallel insertion heuristics, and Russell (1995) developed hybrid insertion--improvement procedures. Tabu search has been particularly successful: Taillard, Badeau, Gendreau, Guertin and Potvin (1997) developed an adaptive memory tabu search that achieved state-of-the-art results on the Solomon benchmarks, while Cordeau, Laporte and Mercier (2001) proposed a unified tabu search heuristic applicable to several VRP variants including the VRPTW. Chiang and Russell (1996) applied simulated annealing with problem-specific cooling schedules, and Li and Lim (2003) developed a hybrid simulated annealing / tabu search method. Br\"aysy (2003) introduced a reactive variable neighborhood search (VNS) with multiple neighborhood structures tailored to the VRPTW, and Br\"aysy and Gendreau (2005a, 2005b) later provided comprehensive surveys of route construction and local search methods for the VRPTW.
+
+\textbf{Large Neighborhood Search and Ruin--Recreate.} Shaw (1998) introduced Large Neighborhood Search (LNS) for vehicle routing, which has had a substantial influence on subsequent VRPTW metaheuristics. Bent and Van Hentenryck (2004) proposed a two-stage hybrid that first minimizes the number of vehicles and then minimizes total travel distance using LNS. Ropke and Pisinger (2006) developed an adaptive large neighborhood search (ALNS) with multiple destroy and repair operators that has become a reference algorithm for a wide range of VRP variants.
+
+\textbf{Population-Based Methods.} Genetic algorithms have been widely applied to the VRPTW. Homberger and Gehring (1999) and Gehring and Homberger (1999, 2001) proposed two-phase evolutionary and parallel metaheuristics, reporting excellent results on large-scale Solomon instances. Berger, Barkaoui and Br\"aysy (2003) developed a hybrid genetic algorithm with specialized crossover operators. More recently, Vidal, Crainic, Gendreau and Prins (2013) introduced a hybrid genetic search with adaptive diversity control (HGSADC) that produced state-of-the-art results across many VRP variants, including the VRPTW. Ant colony optimization has also been applied: Gambardella, Taillard and Agazzi (1999) proposed a multiple ant colony system specifically tailored to the VRPTW, and Br\"aysy, Dullaert and Gendreau (2004) applied evolutionary algorithms combined with deterministic annealing.
+
+\textbf{Adaptive Large Neighborhood Search.} The Large Neighborhood Search (LNS) framework introduced by Shaw (1998) was generalized into Adaptive Large Neighborhood Search (ALNS) by Ropke and Pisinger (2006), who proposed an algorithm with multiple destroy and repair operators selected adaptively based on their historical performance. ALNS has since become a reference algorithm for many VRP variants, including the VRPTW (Pisinger and Ropke, 2007) and various rich VRPs. Demir, Bekta\c{s} and Laporte (2012) applied ALNS to the pollution-routing problem; Hemmelmayr, Cordeau and Crainic (2012) used ALNS for two-echelon and location-routing problems; and Mancini (2016) developed an ALNS for the multi-depot heterogeneous fleet VRPTW. The strength of ALNS lies in its ability to combine diverse neighborhoods (random, worst, related/Shaw, route, history-based removal; greedy, regret-$k$, noise-based insertion) and to adapt operator selection probabilities based on observed contributions to solution improvement.
+
+\textbf{Iterated Local Search and Hybrids.} ILS, formalized by Louren\c{c}o, Martin and St\"utzle (2003), has been successfully applied to numerous VRP variants. Subramanian, Penna, Uchoa and Ochi (2013) developed a hybrid ILS with set partitioning for the heterogeneous fleet VRP, and Penna, Subramanian and Ochi (2013) proposed an ILS with random variable neighborhood descent. More broadly, recent research has increasingly focused on hybridizing metaheuristic search with mathematical programming components. Prescott-Gagnon, Desaulniers and Rousseau (2009) proposed a branch-and-price-based large neighborhood search; Vidal et al.\ (2013, 2014) combined genetic search with educated crossover and local search; and Archetti and Speranza (2014) surveyed matheuristic approaches for VRP. See Vidal, Laporte and Matl (2020) for a recent concise overview of VRP variants and solution methodologies.
+
+\subsubsection{Heterogeneous Fleet VRP and HFVRPTW}
+
+The Heterogeneous Fleet VRP (HFVRP) was introduced by Golden, Assad, Levy and Gheysens (1984) and has been studied extensively since. Two main variants are typically distinguished: the \emph{Fleet Size and Mix VRP (FSMVRP)} with an unlimited number of vehicles of each type, and the \emph{Heterogeneous Fixed Fleet VRP (HFFVRP)} with a limited fleet, which is the variant considered in this work. Comprehensive surveys are provided by Baldacci, Battarra and Vigo (2008), Ho\ss (2008), and Ko\c{c}, Bekta\c{s}, Jabali and Laporte (2016).
+
+For the HFVRP and its time-window extension, several effective metaheuristics have been proposed. Liu and Shen (1999) developed savings-based heuristics for the FSMVRP with time windows. Dell'Amico, Monaci, Pagani and Vigo (2007) proposed a parallel iterative metaheuristic for the HFVRP. Br\"aysy, Dullaert, Hasle, Mester and Norstad (2008) developed effective metaheuristics for VRPTW with heterogeneous fleets. Mancini (2016) and Ko\c{c} et al.\ (2016) demonstrated that ALNS-type algorithms are particularly well suited to heterogeneous-fleet routing because the destroy/repair structure naturally accommodates vehicle-type reassignment, and adaptive operator selection helps balance the trade-off between consolidating demand on large vehicles and exploiting flexibility of small vehicles. Despite the practical importance of the HFVRPTW with limited fleet, comprehensive ALNS designs that explicitly incorporate vehicle-type-aware destroy and repair operators remain comparatively scarce in the literature, which motivates the present work.
+
+\subsection{Scientific Contribution}
+
+This work contributes to the HFVRPTW and metaheuristic literature in the following ways:
+
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Comprehensive ALNS design for HFVRPTW:} Detailed specification of an ALNS metaheuristic tailored to the HFVRPTW with limited fleet, including solution representation, multiple destroy and repair operators, an adaptive operator selection mechanism, and a simulated-annealing-style acceptance criterion.
+    \item \textbf{Vehicle-type-aware operators:} Introduction and explicit treatment of vehicle-type-aware destroy and repair operators that exploit the cost asymmetry between large and small vehicles to consolidate demand efficiently while preserving fleet flexibility.
+    \item \textbf{Rich cost structure:} Modeling of fixed and variable costs per vehicle type, capturing the realistic trade-off between vehicle utilization (fixed cost) and travel distance (variable cost).
+    \item \textbf{Algorithmic transparency:} Complete pseudocodes and implementation details for the ALNS framework, destroy/repair operators, adaptive weighting, and acceptance, to facilitate reproducibility.
+    \item \textbf{Systematic evaluation:} Rigorous computational study on Solomon-derived heterogeneous fleet benchmark instances, with multiple runs, parameter sensitivity, and operator-behavior analysis.
+    \item \textbf{Open implementation:} Documented, reproducible code and experimental scripts to support future research and practical use.
+\end{enumerate}
+
+\section{Problem Definition}
+
+\subsection{Formal Problem Statement}
+
+The Heterogeneous Fleet Vehicle Routing Problem with Time Windows (HFVRPTW) is defined on a complete directed graph $G = (N, A)$ where:
+\begin{itemize}[leftmargin=*]
+    \item $N = \{0\} \cup C$ represents the set of nodes, with node $0$ corresponding to the depot.
+    \item $C = \{1, 2, \ldots, n\}$ is the set of customers to be served.
+    \item $A = \{(i,j) : i,j \in N, i \neq j\}$ is the set of arcs representing possible direct travels.
+\end{itemize}
+
+A \emph{heterogeneous fixed fleet} is available at the depot, consisting of two vehicle types:
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Large vehicles} (type $L$): capacity $Q$, fixed cost $F_L$ per used vehicle, variable cost $\alpha_L$ per unit distance, with a maximum number of $m_L$ vehicles available.
+    \item \textbf{Small vehicles} (type $S$): capacity $q < Q$, fixed cost $F_S$ per used vehicle, variable cost $\alpha_S$ per unit distance, with a maximum number of $m_S$ vehicles available.
+\end{itemize}
+The cost structure follows the realistic logic that large vehicles incur a higher fixed cost ($F_L > F_S$) but a lower per-distance variable cost ($\alpha_L < \alpha_S$), so that consolidating demand on a large vehicle is economically attractive when route length and demand are sufficient, whereas small vehicles offer flexibility for low-demand or scattered customers.
+
+Each customer $i \in C$ is characterized by:
+\begin{itemize}[leftmargin=*]
+    \item A demand $q_i > 0$ that must be delivered.
+    \item A service time $s_i \geq 0$ required to complete the delivery.
+    \item A time window $[a_i, b_i]$ during which service must begin.
+\end{itemize}
+For each arc $(i,j) \in A$, $d_{ij}$ denotes the travel distance and $t_{ij}$ the travel time. The depot has a time window $[a_0, b_0]$ representing operating hours.
+
+\textbf{Objective.} Design a set of vehicle routes that:
+\begin{enumerate}[leftmargin=*]
+    \item Visit each customer exactly once with exactly one vehicle.
+    \item Start and end each route at the depot.
+    \item Respect the capacity of the assigned vehicle type ($Q$ for type $L$, $q$ for type $S$).
+    \item Begin service at each customer $i$ within $[a_i, b_i]$ (early arrival induces waiting until $a_i$).
+    \item Use no more than $m_L$ vehicles of type $L$ and $m_S$ vehicles of type $S$.
+    \item Minimize total cost = sum of fixed costs of used vehicles + sum of variable costs over traversed arcs.
+\end{enumerate}
+
+\subsection{Notation}
+
+\subsubsection{Sets and Indices}
+\begin{itemize}[leftmargin=*]
+    \item $N = \{0\} \cup C$: Set of all nodes (depot $\cup$ customers).
+    \item $C = \{1, 2, \ldots, n\}$: Set of customers.
+    \item $V = \{L, S\}$: Set of vehicle types (large and small).
+    \item $K_v$: Set of available vehicles of type $v \in V$, with $|K_L| = m_L$ and $|K_S| = m_S$.
+    \item $K = K_L \cup K_S$: Set of all vehicles, $|K| = m_L + m_S$.
+    \item $A = \{(i,j) : i,j \in N, i \neq j\}$: Set of arcs.
+\end{itemize}
+
+\subsubsection{Parameters}
+\begin{itemize}[leftmargin=*]
+    \item $q_i$: Demand of customer $i \in C$ (with $q_0 = 0$).
+    \item $Q_v$: Capacity of vehicle type $v$, with $Q_L = Q$ and $Q_S = q$.
+    \item $F_v$: Fixed cost of using a vehicle of type $v$, with $F_L > F_S$.
+    \item $\alpha_v$: Per-distance variable cost of vehicle type $v$, with $\alpha_L < \alpha_S$.
+    \item $d_{ij}$: Travel distance from $i$ to $j$.
+    \item $t_{ij}$: Travel time from $i$ to $j$.
+    \item $s_i$: Service time at customer $i$.
+    \item $[a_i, b_i]$: Time window of customer $i$.
+    \item $m_v$: Maximum number of available vehicles of type $v$.
+    \item $M$: Sufficiently large constant for big-$M$ constraints.
+\end{itemize}
+
+\subsection{Mathematical Model}
+
+We present a Mixed Integer Linear Programming (MILP) formulation of the HFVRPTW.
+
+\subsubsection{Decision Variables}
+\begin{itemize}[leftmargin=*]
+    \item $x_{ijk} \in \{0,1\}$: 1 if vehicle $k \in K$ traverses arc $(i,j)$, 0 otherwise.
+    \item $y_k \in \{0,1\}$: 1 if vehicle $k \in K$ is used (i.e., leaves the depot), 0 otherwise.
+    \item $w_{ik} \geq 0$: Service start time at node $i$ for vehicle $k$.
+\end{itemize}
+
+\subsubsection{Objective Function}
+Minimize total cost (fixed cost of used vehicles plus distance-based variable cost):
+\begin{equation}
+\min Z = \sum_{v \in V} \sum_{k \in K_v} F_v \cdot y_k \;+\; \sum_{v \in V} \sum_{k \in K_v} \alpha_v \sum_{(i,j) \in A} d_{ij} \cdot x_{ijk}
+\end{equation}
+
+\subsubsection{Constraints}
+
+\textbf{(1) Each customer visited exactly once:}
+\begin{equation}
+\sum_{k \in K} \sum_{j \in N,\, j \neq i} x_{ijk} = 1, \quad \forall i \in C
+\end{equation}
+
+\textbf{(2) Flow conservation:}
+\begin{equation}
+\sum_{i \in N} x_{ihk} = \sum_{j \in N} x_{hjk}, \quad \forall h \in N, \forall k \in K
+\end{equation}
+
+\textbf{(3) Vehicle usage linking:}
+\begin{equation}
+\sum_{j \in C} x_{0jk} = y_k, \quad \forall k \in K
+\end{equation}
+
+\textbf{(4) Each vehicle returns to the depot if used:}
+\begin{equation}
+\sum_{i \in C} x_{i0k} = y_k, \quad \forall k \in K
+\end{equation}
+
+\textbf{(5) Capacity constraint per vehicle type:}
+\begin{equation}
+\sum_{i \in C} q_i \sum_{j \in N} x_{ijk} \leq Q_v \cdot y_k, \quad \forall v \in V, \forall k \in K_v
+\end{equation}
+
+\textbf{(6) Fleet size limits per vehicle type:}
+\begin{equation}
+\sum_{k \in K_v} y_k \leq m_v, \quad \forall v \in V
+\end{equation}
+
+\textbf{(7) Time window constraints:}
+\begin{equation}
+a_i \leq w_{ik} \leq b_i, \quad \forall i \in N, \forall k \in K
+\end{equation}
+
+\textbf{(8) Time consistency (arrival time propagation):}
+\begin{equation}
+w_{ik} + s_i + t_{ij} \leq w_{jk} + M(1 - x_{ijk}), \quad \forall (i,j) \in A, \forall k \in K
+\end{equation}
+
+\textbf{(9) Variable domains:}
+\begin{equation}
+x_{ijk} \in \{0,1\}, \quad y_k \in \{0,1\}, \quad w_{ik} \geq 0, \quad \forall i,j \in N, \forall k \in K
+\end{equation}
+
+The objective function (1) captures the trade-off between consolidating demand on costly-to-deploy but distance-cheap large vehicles and using flexible but distance-expensive small vehicles. Constraints (3)--(4) link route construction to vehicle usage; constraints (5)--(6) enforce vehicle capacities and fleet-size limits separately for each type; constraints (7)--(8) impose time-window feasibility.
+
+\subsection{Problem Complexity}
+
+The HFVRPTW is strongly NP-hard. It generalizes the classical VRPTW (which is itself NP-hard, generalizing both the TSP and the bin-packing problem) by introducing the additional combinatorial decision of vehicle-type assignment subject to limited fleet sizes. This vehicle-type dimension significantly enlarges the search space and complicates feasibility evaluation, since both the capacity check and the cost evaluation depend on which type is assigned to each route. For instances with more than $50$--$100$ customers, exact approaches based on column generation or branch-and-cut become computationally impractical, motivating the metaheuristic approach developed in the next section.
+
+\section{Description of the Metaheuristic Algorithm}
+
+In this section, we describe the proposed Adaptive Large Neighborhood Search (ALNS) metaheuristic for the HFVRPTW. We first present the rationale for selecting ALNS, followed by the general framework, solution representation, initial solution construction, the catalogue of destroy and repair operators (including vehicle-type-aware variants), the adaptive operator selection mechanism, the simulated-annealing-based acceptance criterion, the complete ALNS scheme, parameter settings, and the computational complexity of the main components.
+
+\subsection{Rationale for Adaptive Large Neighborhood Search}
+
+The HFVRPTW combines three sources of combinatorial complexity: customer routing, time-window feasibility, and vehicle-type assignment under fleet-size limits. Among the available metaheuristic frameworks, ALNS is particularly well suited to this problem for several reasons:
+
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Large neighborhood exploration:} Destroy/repair moves modify many customer assignments simultaneously, allowing the search to escape local optima that small-neighborhood operators (relocate, swap, 2-opt) cannot escape on their own.
+    \item \textbf{Operator diversity:} Multiple destroy operators (random, worst, related/Shaw, route, vehicle-type-aware) and repair operators (greedy, regret-$k$, vehicle-type-aware) cover complementary parts of the search space.
+    \item \textbf{Adaptive operator selection:} A roulette-wheel mechanism with operator scores updated based on historical performance dynamically focuses computational effort on the operators that work best on the instance at hand.
+    \item \textbf{Natural fit for vehicle-type reassignment:} Removing customers and reinserting them with possibly different vehicle types is a structural operation in HFVRPTW; the destroy/repair paradigm captures this directly, whereas neighborhood-based methods (e.g., ILS with VND) typically require explicit type-change operators.
+    \item \textbf{Strong literature support:} ALNS is the reference algorithm for many VRP variants (Ropke and Pisinger, 2006; Pisinger and Ropke, 2007) and has been particularly effective on heterogeneous-fleet routing (Mancini, 2016; Ko\c{c} et al., 2016).
+\end{enumerate}
+
+\subsection{General Framework}
+
+ALNS iteratively destroys part of the current solution and repairs it, accepting or rejecting the resulting solution according to a simulated-annealing criterion. At each iteration:
+\begin{enumerate}[leftmargin=*]
+    \item A destroy operator $d$ is chosen probabilistically from a set $\mathcal{D}$ according to its current weight.
+    \item A repair operator $r$ is chosen probabilistically from a set $\mathcal{R}$ according to its current weight.
+    \item The selected pair $(d, r)$ is applied to the current solution $S$, producing a candidate solution $S'$.
+    \item The acceptance criterion decides whether $S'$ replaces $S$.
+    \item Operator scores are updated based on the outcome (new global best, improvement over current, or simply accepted).
+    \item Periodically (every $\Theta$ iterations), operator weights are recomputed from accumulated scores.
+\end{enumerate}
+The temperature parameter of the acceptance criterion is decreased over time, gradually shifting the search from diversification to intensification.
+
+\subsection{Solution Representation}
+
+A solution is represented as a set of routes
+\begin{equation}
+S = \{(R_1, v_1), (R_2, v_2), \ldots, (R_m, v_m)\},
+\end{equation}
+where each route is a tuple consisting of an ordered customer sequence
+\begin{equation}
+R_k = (0, c_1^k, c_2^k, \ldots, c_{n_k}^k, 0)
+\end{equation}
+and an associated vehicle type $v_k \in \{L, S\}$. For each route, we cache the total demand $\sum_i q_{c_i^k}$, the total distance, the service start times $w_{c_i^k}$, and the type-dependent capacity $Q_{v_k}$ used during feasibility checks. The cost of a solution is
+\begin{equation}
+f(S) = \sum_{k=1}^m \left[ F_{v_k} + \alpha_{v_k} \cdot \mathrm{dist}(R_k) \right] + \pi \cdot \mathrm{viol}(S),
+\end{equation}
+where $\mathrm{viol}(S)$ aggregates capacity and time-window violations for handling intermediate infeasibilities during search, and $\pi$ is a large penalty weight.
+
+\subsection{Initial Solution Construction}
+
+The initial solution is generated by a vehicle-type-aware sequential insertion heuristic that prioritizes large vehicles to consolidate demand whenever possible (Algorithm~\ref{alg:init}). When the large-fleet limit $m_L$ is exhausted or when an attempted insertion is infeasible, the heuristic falls back to small vehicles.
+
+\begin{algorithm}[H]
+\caption{Vehicle-Type-Aware Sequential Insertion}
+\label{alg:init}
+\begin{algorithmic}[1]
+\STATE $S \gets \emptyset$;\quad $U \gets C$;\quad $n_L \gets 0$;\quad $n_S \gets 0$
+\WHILE{$U \neq \emptyset$}
+    \STATE Choose vehicle type $v$: prefer $L$ if $n_L < m_L$, else $S$ if $n_S < m_S$, else \textbf{fail}
+    \STATE Initialize empty route $R = (0, 0)$ of type $v$
+    \WHILE{a feasible insertion of some $i \in U$ into $R$ exists}
+        \STATE Select unrouted $i^*$ minimizing insertion cost (distance increase) into $R$ subject to $Q_v$ and time windows
+        \STATE Insert $i^*$ at its best feasible position in $R$;\quad $U \gets U \setminus \{i^*\}$
+    \ENDWHILE
+    \STATE $S \gets S \cup \{(R, v)\}$;\quad increment $n_v$
+\ENDWHILE
+\RETURN $S$
+\end{algorithmic}
+\end{algorithm}
+
+\subsection{Destroy Operators}
+\label{sec:destroy}
+
+The destroy phase removes a subset of $\eta$ customers from the current solution, where $\eta$ is sampled uniformly from $[\eta_{\min}, \eta_{\max}]$ (typically $0.10\,n$ to $0.40\,n$). The removed customers are stored in a request bank $\mathcal{B}$ and reinserted by a repair operator. We employ five destroy operators:
+
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Random Removal.} Select $\eta$ customers uniformly at random and remove them. Provides high diversification and serves as an unbiased baseline.
+    \item \textbf{Worst Removal.} For each customer $i$ currently in some route, compute the cost reduction $\Delta f_i = f(S) - f(S \setminus \{i\})$. Repeatedly remove the customer with the largest $\Delta f_i$ (a randomization parameter $p_{\text{worst}} \geq 1$ controls greediness via $i^* = \mathcal{L}[\lfloor y^{p_{\text{worst}}} |\mathcal{L}| \rfloor]$, where $\mathcal{L}$ is the list of customers sorted by $\Delta f_i$ in non-increasing order and $y \sim U(0,1)$). This operator targets ``expensive'' customers whose removal is most beneficial.
+    \item \textbf{Shaw / Related Removal.} Iteratively remove customers that are similar to one previously removed customer. Similarity between $i$ and $j$ is defined as
+    \begin{equation}
+    \rho_{ij} = \phi_1 \frac{d_{ij}}{d_{\max}} + \phi_2 \frac{|a_i - a_j| + |b_i - b_j|}{T_{\max}} + \phi_3 \frac{|q_i - q_j|}{q_{\max}},
+    \end{equation}
+    where $\phi_1, \phi_2, \phi_3$ are normalized weights. Smaller $\rho_{ij}$ means higher similarity. Removing related customers increases the chance that the repair phase reorganizes meaningful clusters.
+    \item \textbf{Route Removal.} Select one entire route uniformly at random and remove all its customers. Particularly useful in the heterogeneous setting because it frees a vehicle slot of a particular type, enabling type reassignment during repair.
+    \item \textbf{Vehicle-Type-Aware Removal.} Sample a vehicle type $v$ with probability proportional to its average per-customer cost in the current solution, then remove $\eta$ customers from routes of that type. This operator deliberately disturbs the type distribution and lets the repair phase re-balance load between large and small vehicles.
+\end{enumerate}
+
+\subsection{Repair Operators}
+\label{sec:repair}
+
+After destruction, the request bank $\mathcal{B}$ is reinserted using one of three repair operators. All insertions respect capacity (per the assigned vehicle type), time windows, and fleet-size limits.
+
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Greedy Insertion.} Repeatedly select the customer--position pair $(i^*, p^*)$ with the smallest insertion cost $\Delta_{i,p}$ over all $i \in \mathcal{B}$ and feasible positions $p$ across all routes. If no feasible insertion exists for some $i$, open a new route using a vehicle type that still has capacity in the fleet (preferring $L$ for large demand and $S$ otherwise).
+    \item \textbf{Regret-$k$ Insertion.} For each $i \in \mathcal{B}$, compute insertion costs $\Delta^{(1)}_i \leq \Delta^{(2)}_i \leq \ldots$ at the best feasible positions in different routes, and define the regret value
+    \begin{equation}
+    \Delta^{\mathrm{reg}}_i = \sum_{\ell=2}^{k} \left( \Delta^{(\ell)}_i - \Delta^{(1)}_i \right).
+    \end{equation}
+    Insert the customer with the largest regret value at its best position; iterate until $\mathcal{B} = \emptyset$. We use $k = 2$ and $k = 3$. Regret-$k$ delays insertions that have many similarly cheap options and prioritizes those that will become much more expensive if not inserted now.
+    \item \textbf{Vehicle-Type-Aware Insertion.} For each $i \in \mathcal{B}$, evaluate the marginal cost of insertion into each route, but bias the choice toward large vehicles when the resulting load utilization exceeds a threshold $\tau$ (e.g., $\tau = 0.6 \cdot Q$). Concretely, the score of inserting $i$ at position $p$ in route $R$ of type $v$ is
+    \begin{equation}
+    \mathrm{score}_{i,p,R} = \Delta_{i,p,R} - \beta \cdot \mathbf{1}[v = L \text{ and } \mathrm{load}(R) + q_i \geq \tau],
+    \end{equation}
+    where $\beta > 0$ is a small consolidation bonus. This operator explicitly exploits the cost asymmetry $\alpha_L < \alpha_S$ and guides the search toward consolidated large-vehicle routes.
+\end{enumerate}
+
+\subsection{Adaptive Operator Selection}
+
+Each destroy operator $d \in \mathcal{D}$ has a weight $\omega_d$ and a score $\sigma_d$; analogously for repair operators $r \in \mathcal{R}$. At each iteration, an operator is selected by roulette-wheel sampling:
+\begin{equation}
+P(d) = \frac{\omega_d}{\sum_{d' \in \mathcal{D}} \omega_{d'}}, \qquad P(r) = \frac{\omega_r}{\sum_{r' \in \mathcal{R}} \omega_{r'}}.
+\end{equation}
+After applying the pair $(d, r)$ and obtaining $S'$, the operator scores are incremented by a reward $\sigma$ that depends on the outcome:
+\begin{equation}
+\sigma =
+\begin{cases}
+\sigma_1, & \text{if } S' \text{ is a new global best},\\
+\sigma_2, & \text{if } S' \text{ is better than the current solution } S,\\
+\sigma_3, & \text{if } S' \text{ is worse but accepted},\\
+0,        & \text{otherwise},
+\end{cases}
+\end{equation}
+with $\sigma_1 > \sigma_2 > \sigma_3 > 0$ (typical values: $\sigma_1 = 33$, $\sigma_2 = 9$, $\sigma_3 = 13$, following Ropke and Pisinger, 2006). Every $\Theta$ iterations (a \emph{segment}), weights are updated using a reaction factor $\lambda \in [0, 1]$:
+\begin{equation}
+\omega_o \gets (1 - \lambda)\, \omega_o + \lambda \cdot \frac{\sigma_o}{\max(\theta_o, 1)},
+\end{equation}
+where $\theta_o$ is the number of times operator $o$ was used in the segment. Scores and usage counts are then reset.
+
+\subsection{Acceptance Criterion: Simulated Annealing}
+
+We employ a simulated-annealing acceptance criterion (Algorithm~\ref{alg:accept}). Improving moves are always accepted; non-improving moves are accepted with probability $\exp\!\left(-\Delta f / T\right)$, where $T$ is the current temperature. The temperature is initialized so that a solution that is $\delta$\% worse than the initial solution is accepted with probability $0.5$ (a common heuristic by Ropke and Pisinger, 2006), and is decreased geometrically: $T \gets c\,T$ at every iteration with cooling rate $c \in (0,1)$.
+
+\begin{algorithm}[H]
+\caption{Simulated Annealing Acceptance}
+\label{alg:accept}
+\begin{algorithmic}[1]
+\REQUIRE Current solution $S$, candidate $S'$, temperature $T$
+\IF{$f(S') < f(S)$}
+    \RETURN \textbf{accept}
+\ELSE
+    \STATE Sample $u \sim U(0,1)$
+    \IF{$u < \exp\!\big(-(f(S') - f(S))/T\big)$}
+        \RETURN \textbf{accept}
+    \ELSE
+        \RETURN \textbf{reject}
+    \ENDIF
+\ENDIF
+\end{algorithmic}
+\end{algorithm}
+
+\subsection{Complete ALNS Algorithm}
+
+The complete ALNS scheme is presented in Algorithm~\ref{alg:alns}. Every $\Theta$ iterations, operator weights are updated and counters are reset (a \emph{segment update}); the temperature is decreased every iteration; the global best solution $S^{\mathrm{best}}$ is tracked separately from the current solution $S$.
+
+\begin{algorithm}[H]
+\caption{Adaptive Large Neighborhood Search for HFVRPTW}
+\label{alg:alns}
+\begin{algorithmic}[1]
+\REQUIRE Iteration limit $I_{\max}$, segment length $\Theta$, cooling rate $c$, initial temperature $T_0$, reaction factor $\lambda$
+\STATE $S \gets$ \textsc{InitialSolution}() \COMMENT{Algorithm~\ref{alg:init}}
+\STATE $S^{\mathrm{best}} \gets S$
+\STATE Initialize operator weights $\omega_d \gets 1$ for $d \in \mathcal{D}$; $\omega_r \gets 1$ for $r \in \mathcal{R}$
+\STATE Initialize scores $\sigma_o \gets 0$ and counts $\theta_o \gets 0$ for all operators $o$
+\STATE $T \gets T_0$
+\FOR{iteration $t = 1, 2, \ldots, I_{\max}$}
+    \STATE Select $d \in \mathcal{D}$ and $r \in \mathcal{R}$ by roulette-wheel sampling using $\{\omega_o\}$
+    \STATE $\eta \gets$ random integer in $[\eta_{\min}, \eta_{\max}]$
+    \STATE $(S^{\mathrm{partial}}, \mathcal{B}) \gets d(S, \eta)$ \COMMENT{Destroy}
+    \STATE $S' \gets r(S^{\mathrm{partial}}, \mathcal{B})$ \COMMENT{Repair}
+    \STATE $\theta_d \gets \theta_d + 1$;\quad $\theta_r \gets \theta_r + 1$
+    \IF{$f(S') < f(S^{\mathrm{best}})$}
+        \STATE $S^{\mathrm{best}} \gets S'$;\quad $\sigma_d \gets \sigma_d + \sigma_1$;\quad $\sigma_r \gets \sigma_r + \sigma_1$
+        \STATE $S \gets S'$
+    \ELSIF{$f(S') < f(S)$}
+        \STATE $S \gets S'$;\quad $\sigma_d \gets \sigma_d + \sigma_2$;\quad $\sigma_r \gets \sigma_r + \sigma_2$
+    \ELSIF{\textsc{SimulatedAnnealing}($S, S', T$) accepts $S'$}
+        \STATE $S \gets S'$;\quad $\sigma_d \gets \sigma_d + \sigma_3$;\quad $\sigma_r \gets \sigma_r + \sigma_3$
+    \ENDIF
+    \STATE $T \gets c \cdot T$
+    \IF{$t \bmod \Theta = 0$}
+        \STATE Update weights $\omega_o \gets (1-\lambda)\,\omega_o + \lambda\,\sigma_o / \max(\theta_o, 1)$ for all operators
+        \STATE Reset $\sigma_o \gets 0$ and $\theta_o \gets 0$ for all operators
+    \ENDIF
+\ENDFOR
+\RETURN $S^{\mathrm{best}}$
+\end{algorithmic}
+\end{algorithm}
+
+\subsection{Algorithm Parameters}
+
+The key parameters of the proposed ALNS are summarized in Table~\ref{tab:params}. Initial values are taken from the recommendations of Ropke and Pisinger (2006) and Pisinger and Ropke (2007); they will be refined by sensitivity analysis on small Solomon-derived instances.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{@{}lll@{}}
+\toprule
+\textbf{Parameter} & \textbf{Description} & \textbf{Initial value} \\
+\midrule
+$I_{\max}$ & Iteration limit & $25{,}000$ \\
+$\Theta$ & Segment length (weight update period) & $100$ \\
+$\lambda$ & Reaction factor for weight updates & $0.1$ \\
+$T_0$ & Initial temperature (calibrated to $0.5$ acceptance at $\delta = 0.05$) & instance-dependent \\
+$c$ & Cooling rate (geometric) & $0.99975$ \\
+$\eta_{\min}, \eta_{\max}$ & Min/max number of customers removed & $0.10\,n,\ 0.40\,n$ \\
+$\sigma_1, \sigma_2, \sigma_3$ & Score rewards (new best / better / accepted-worse) & $33,\ 9,\ 13$ \\
+$p_{\mathrm{worst}}$ & Worst-removal randomization exponent & $3$ \\
+$\phi_1, \phi_2, \phi_3$ & Shaw similarity weights (distance, time, demand) & $9, 3, 2$ \\
+$k$ & Regret degree & $2, 3$ \\
+$\tau$ & Consolidation threshold for vehicle-type-aware insertion & $0.6\,Q$ \\
+$\beta$ & Consolidation bonus & $0.05 \cdot \alpha_S \cdot \bar{d}$ \\
+$\pi$ & Penalty weight for infeasibilities & $10^4$ \\
+\bottomrule
+\end{tabular}
+\caption{Parameters of the proposed ALNS for HFVRPTW.}
+\label{tab:params}
+\end{table}
+
+\subsection{Computational Complexity}
+
+The complexity of the main algorithmic components is summarized below ($n$: number of customers, $m$: number of vehicles in the current solution).
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Initial solution:} $O(n^2)$ for sequential insertion with feasibility checks.
+    \item \textbf{Feasibility check:} $O(|R|)$ per route via forward time-window propagation; can be reduced to amortized $O(1)$ per insertion using forward/backward time-slack data structures.
+    \item \textbf{Destroy operators:} $O(\eta)$ for random and route removal; $O(n \log n)$ for worst removal (sorting); $O(\eta\,n)$ for Shaw/related and vehicle-type-aware removal.
+    \item \textbf{Repair operators:} $O(\eta\,n\,m)$ for greedy insertion in the worst case; $O(\eta\,n\,m\,k)$ for regret-$k$ insertion. Vehicle-type-aware insertion has the same asymptotic order as greedy.
+    \item \textbf{Operator selection and weight update:} $O(|\mathcal{D}| + |\mathcal{R}|)$ per iteration, $O(|\mathcal{D}| + |\mathcal{R}|)$ per segment.
+    \item \textbf{Overall ALNS:} $O(I_{\max} \cdot \eta \cdot n \cdot m \cdot k)$ in the worst case, dominated by the repair phase.
+\end{itemize}
+In practice, careful implementation of incremental feasibility evaluation and route caching reduces the runtime substantially, and the algorithm scales well to the size of standard Solomon-derived instances.
+
+\section{Computational Study}
+
+This section presents the computational evaluation of the proposed ALNS algorithm on Solomon-derived heterogeneous fleet instances. We first describe the experimental setup, then analyze the initial solution constructors, present parameter tuning results, compare ALNS against alternative heuristics, and finally report the best solutions obtained.
+
+\subsection{Experimental Setup}
+
+\subsubsection{Test Instances}
+
+We use two benchmark instances derived from the well-known Solomon (1987) benchmark set:
+\begin{itemize}[leftmargin=*]
+    \item \textbf{C20:} First 20 customers of Solomon C101 (clustered customer distribution). Customers are geographically concentrated in clusters, leading to natural route groupings.
+    \item \textbf{R20:} First 20 customers of Solomon R101 (random customer distribution). Customers are uniformly distributed in the service area, resulting in more dispersed and irregular routing patterns.
+\end{itemize}
+
+These instances allow comprehensive evaluation of the algorithm under two fundamentally different spatial structures while keeping computational times manageable for extensive parameter sensitivity analysis.
+
+\subsubsection{Fleet Configuration and Cost Structure}
+
+The heterogeneous fleet configuration used throughout the experiments is summarized in Table~\ref{tab:fleet}.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{@{}lccccc@{}}
+\toprule
+\textbf{Vehicle Type} & \textbf{Capacity ($Q_v$)} & \textbf{Fixed Cost ($F_v$)} & \textbf{Variable Cost ($\alpha_v$)} & \textbf{Max Fleet ($m_v$)} \\
+\midrule
+Large (L) & 200 & 200 & 1.0 & 3 \\
+Small (S) & 100 & 100 & 1.5 & 4 \\
+\bottomrule
+\end{tabular}
+\caption{Heterogeneous fleet configuration.}
+\label{tab:fleet}
+\end{table}
+
+\subsubsection{Soft Time Windows}
+
+We employ soft time windows with a linear lateness penalty $\lambda_{\text{late}} = 50$ per unit of late time:
+\begin{equation}
+f(S) = \sum_{k} \left[ F_{v_k} + \alpha_{v_k} \cdot \mathrm{dist}(R_k) \right] + \lambda_{\text{late}} \cdot \sum_{i \in C} \max(0, w_i - b_i).
+\end{equation}
+This formulation penalizes but does not prohibit late arrivals, allowing the search to explore temporarily infeasible regions while being strongly guided toward feasibility.
+
+\subsubsection{Stopping Criteria}
+
+The ALNS terminates when either condition is met:
+\begin{itemize}[leftmargin=*]
+    \item Maximum of $I_{\max} = 2000$ iterations, \textbf{or}
+    \item Wall-clock time of 60 seconds.
+\end{itemize}
+In all experiments on 20-customer instances, the iteration limit was reached first (runtime $\approx 3$--$5$ seconds), confirming that the time budget is not the binding constraint.
+
+\subsubsection{Implementation Details}
+
+The algorithm is implemented in Python 3.11 without external optimization solvers. All experiments are run on a MacOS system. Each stochastic method is evaluated with 3 independent seeds (42, 7, 123) to assess robustness. Reproducibility is ensured through fixed random seeds and documented experimental scripts.
+
+\subsection{Initial Solution Constructor Comparison}
+
+We implemented five initial solution constructors and compared their quality both as standalone heuristics and as starting points for ALNS:
+
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{type\_aware:} Vehicle-type-aware sequential insertion (Algorithm~\ref{alg:init}).
+    \item \textbf{clarke\_wright:} Classic Clarke-Wright savings algorithm with vehicle-type assignment.
+    \item \textbf{cw\_tw\_simple:} Clarke-Wright with temporal compatibility penalty in savings.
+    \item \textbf{cw\_tw\_full:} Clarke-Wright with full cost-delta evaluation including time windows.
+    \item \textbf{random:} Random customer insertion into feasible positions.
+\end{enumerate}
+
+Table~\ref{tab:initials} presents the initial solution quality and the final ALNS cost achieved from each starting point.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{@{}llrrrr@{}}
+\toprule
+\textbf{Instance} & \textbf{Constructor} & \textbf{Init Cost} & \textbf{Init Late} & \textbf{Final Best} & \textbf{Final Mean} \\
+\midrule
+C20 & type\_aware & 107,450 & 2,136 & 650.23 & 650.72 \\
+C20 & clarke\_wright & 760.02 & 0.00 & 650.23 & 650.72 \\
+C20 & cw\_tw\_simple & 685.37 & 0.00 & 650.23 & 650.72 \\
+C20 & cw\_tw\_full & 695.46 & 0.00 & 650.23 & 650.72 \\
+C20 & random & 149,250 & 2,950 & 650.23 & 651.21 \\
+\midrule
+R20 & type\_aware & 124,557 & 2,474 & 1,461.86 & 1,461.86 \\
+R20 & clarke\_wright & 8,432 & 145 & 1,461.86 & 1,462.04 \\
+R20 & cw\_tw\_simple & 8,126 & 137 & 1,461.86 & 1,461.86 \\
+R20 & cw\_tw\_full & 8,298 & 142 & 1,461.86 & 1,462.32 \\
+R20 & random & 168,340 & 3,350 & 1,461.86 & 1,463.13 \\
+\bottomrule
+\end{tabular}
+\caption{Comparison of initial solution constructors. Init Cost and Init Late are construction-only values; Final Best/Mean are post-ALNS costs (2000 iterations, 3 seeds).}
+\label{tab:initials}
+\end{table}
+
+\textbf{Key finding:} All five constructors converge to essentially the same final cost (650.23 for C20, 1461.86 for R20) when given sufficient ALNS iterations. This demonstrates the robustness of the destroy/repair paradigm: regardless of starting quality, ALNS reaches the same solution quality. Among constructors, \textbf{cw\_tw\_simple} produces the best initial solution (685.37 for C20 with zero lateness), but since ALNS compensates for poor initial solutions, we selected \textbf{type\_aware} as the default because it provides a consistent, fleet-aware structure.
+
+\subsection{Parameter Tuning}
+
+We conducted a systematic one-at-a-time sensitivity analysis on four key parameters (Table~\ref{tab:tuning-results}). All other parameters were fixed at their default values during each experiment.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{@{}llrrr@{}}
+\toprule
+\textbf{Parameter} & \textbf{Value} & \textbf{C20 Mean} & \textbf{R20 Mean} & \textbf{Comment} \\
+\midrule
+\multirow{4}{*}{cooling\_rate $c$} & 0.995 & 666.13 & 1,462.98 & Too aggressive \\
+& 0.997 & \textbf{650.23} & \textbf{1,461.86} & Optimal \\
+& 0.998 & 650.72 & 1,461.86 & Near-optimal \\
+& 0.999 & 650.79 & 1,461.90 & Too slow \\
+\midrule
+\multirow{3}{*}{segment\_length $\Theta$} & 50 & 651.42 & 1,462.29 & \\
+& 100 & \textbf{650.72} & \textbf{1,461.86} & Default \\
+& 200 & 650.72 & 1,462.04 & \\
+\midrule
+\multirow{3}{*}{$\eta_{\max}$ fraction} & 0.25 & 652.18 & 1,465.33 & Under-destroys \\
+& 0.40 & \textbf{650.72} & \textbf{1,461.86} & Optimal \\
+& 0.55 & 651.35 & 1,462.32 & Over-destroys \\
+\midrule
+\multirow{3}{*}{reaction\_factor $\lambda$} & 0.05 & 650.79 & 1,462.42 & \\
+& 0.10 & \textbf{650.72} & \textbf{1,461.86} & Default \\
+& 0.20 & 650.79 & 1,461.86 & \\
+\bottomrule
+\end{tabular}
+\caption{Parameter sensitivity analysis results. Bold values indicate best configuration. Mean cost over 3 seeds reported.}
+\label{tab:tuning-results}
+\end{table}
+
+\textbf{Analysis:}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Cooling rate} is the most sensitive parameter. With $c = 0.995$ the temperature drops too quickly (mean C20 cost 666 vs.\ 650), leaving insufficient exploration budget. With $c = 0.997$--$0.998$ ($T_{\text{final}} / T_0 \approx 0.002$--$0.018$), the algorithm balances diversification and intensification well.
+    \item \textbf{Destruction ratio} ($\eta_{\max}$) has moderate sensitivity. At 0.25 (destroying only $\sim$5 customers), moves are too conservative for R20's dispersed structure; at 0.55, too much destruction slows convergence.
+    \item \textbf{Segment length} and \textbf{reaction factor} show low sensitivity, indicating the adaptive mechanism is robust across reasonable settings.
+\end{itemize}
+
+The parameter sensitivity results are visualized in Figure~\ref{fig:tuning}.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.85\textwidth]{tuning_C20.png}
+\caption{Parameter sensitivity analysis for C20 instance. Each subplot shows the effect of varying one parameter on solution quality (mean, best, worst over 3 seeds).}
+\label{fig:tuning}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.85\textwidth]{tuning_R20.png}
+\caption{Parameter sensitivity analysis for R20 instance.}
+\label{fig:tuning-r20}
+\end{figure}
+
+\subsection{Comparison with Alternative Heuristics}
+
+To evaluate the contribution of the destroy/repair paradigm, we compare ALNS against four alternative methods under the same time budget (60 seconds) or iteration limit:
+
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Standalone SA:} Simulated annealing using five small-neighbourhood moves (2-opt*, inter-route relocate, or-opt, intra-route 2-opt, inter-route swap). Started from CW-TW-simple solution. 50,000 iterations, auto-tuned cooling.
+    \item \textbf{Nearest Neighbour (NN):} Greedy construction with time-window-aware tie-breaking.
+    \item \textbf{Clarke-Wright TW (CW-TW):} CW savings with temporal compatibility penalty (construction only, no improvement).
+    \item \textbf{Greedy (type\_aware):} Vehicle-type-aware sequential insertion (construction only).
+\end{enumerate}
+
+Table~\ref{tab:benchmark} summarizes the results.
+
+\begin{table}[htbp]
+\centering
+\begin{tabular}{@{}llrrrrr@{}}
+\toprule
+\textbf{Instance} & \textbf{Method} & \textbf{Best} & \textbf{Mean} & \textbf{Worst} & \textbf{Lateness} & \textbf{Time (s)} \\
+\midrule
+C20 & \textbf{ALNS} & \textbf{650.23} & \textbf{650.72} & \textbf{651.71} & \textbf{0.00} & 3.5 \\
+C20 & SA & 685.37 & 685.37 & 685.37 & 0.00 & 0.7 \\
+C20 & CW-TW & 685.37 & 685.37 & 685.37 & 0.00 & $<$0.01 \\
+C20 & Greedy & 107,450 & 107,450 & 107,450 & 2,136 & $<$0.01 \\
+C20 & NN & 298,232 & 298,232 & 298,232 & 5,952 & $<$0.01 \\
+\midrule
+R20 & \textbf{ALNS} & \textbf{1,461.86} & \textbf{1,461.86} & \textbf{1,461.86} & \textbf{0.00} & 5.0 \\
+R20 & SA & 8,125.99 & 8,125.99 & 8,125.99 & 137.31 & 0.8 \\
+R20 & CW-TW & 8,125.99 & 8,125.99 & 8,125.99 & 137.31 & $<$0.01 \\
+R20 & Greedy & 124,557 & 124,557 & 124,557 & 2,474 & $<$0.01 \\
+R20 & NN & 294,247 & 294,247 & 294,247 & 5,868 & $<$0.01 \\
+\bottomrule
+\end{tabular}
+\caption{Benchmark comparison of ALNS against alternative heuristics. ALNS achieves dramatically lower cost and zero lateness on both instances.}
+\label{tab:benchmark}
+\end{table}
+
+\textbf{Key observations:}
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{ALNS vs.\ Standalone SA:} SA with small-neighbourhood moves (2-opt*, relocate, swap) cannot improve beyond the CW-TW initial solution, despite 50,000 iterations. The SA is trapped in a local optimum because its moves can only perturb 1--2 customers at a time, whereas ALNS's destroy/repair operators restructure 2--8 customers simultaneously, enabling escape from deep local optima.
+    \item \textbf{ALNS vs.\ Construction Heuristics:} Construction-only methods produce widely varying quality. CW-TW achieves good results on C20 (685, only 5\% above ALNS optimal) but performs poorly on R20 (8,126 with lateness 137), where the random customer distribution requires significant restructuring.
+    \item \textbf{Lateness elimination:} Only ALNS achieves zero lateness on both instances, demonstrating its ability to restructure routes to satisfy all time windows.
+    \item \textbf{Cost reduction magnitude:} On R20, ALNS improves the CW-TW solution by 82\% ($8{,}126 \to 1{,}462$), demonstrating the transformative power of the destroy/repair paradigm.
+\end{enumerate}
+
+The benchmark comparison is visualized in Figures~\ref{fig:bench-c20} and~\ref{fig:bench-r20}.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{benchmark_C20.png}
+\caption{Benchmark comparison for C20: (top-left) all methods on log scale, (top-right) ALNS vs SA vs CW-TW zoomed, (bottom-left) convergence on log scale, (bottom-right) ALNS convergence zoomed.}
+\label{fig:bench-c20}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{benchmark_R20.png}
+\caption{Benchmark comparison for R20.}
+\label{fig:bench-r20}
+\end{figure}
+
+\subsection{Why ALNS Outperforms Alternative Methods}
+
+The dramatic superiority of ALNS over standalone SA and construction heuristics can be attributed to the following structural advantages of the destroy/repair paradigm:
+
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Large-neighbourhood exploration:} Removing 2--8 customers and reinserting them creates exponentially more neighbourhood structure than single-customer moves. This enables the algorithm to ``jump'' over barriers between local optima that separate fundamentally different route configurations.
+
+    \item \textbf{Vehicle-type reassignment:} When customers are removed and reinserted, their vehicle-type assignment is implicitly reconsidered. This is critical in the HFVRPTW where the optimal solution may require consolidating customers on large vehicles vs.\ distributing them across small vehicles---a structural decision that single-swap moves cannot effectively explore.
+
+    \item \textbf{Adaptive operator diversity:} The five destroy and four repair operators cover complementary aspects of the solution space. Random removal provides diversification; worst removal targets expensive customers; Shaw removal exploits spatial/temporal correlations; route removal enables complete restructuring; and vehicle-type-aware operators explicitly address the fleet composition decision.
+
+    \item \textbf{Intelligent intensification/diversification balance:} The simulated-annealing acceptance criterion with calibrated temperature scheduling transitions smoothly from exploration (high $T$) to exploitation (low $T$). The adaptive weights further focus effort on the most productive operator combinations for each instance.
+
+    \item \textbf{Time-window handling:} Large moves can simultaneously resolve multiple time-window violations by resequencing customers, whereas small moves (relocate, swap) typically fix one violation while creating another.
+\end{enumerate}
+
+\subsection{Final Results}
+
+The final ALNS configuration uses the \textbf{type\_aware} constructor, cooling rate $c = 0.998$, and stopping criteria of 2000 iterations or 60 seconds. Table~\ref{tab:final} presents the results over 3 seeds.
+
+\begin{table}[htbp]
+\centering
+\begin{tabular}{@{}lrrrrrr@{}}
+\toprule
+\textbf{Instance} & \textbf{Best} & \textbf{Mean} & \textbf{Worst} & \textbf{Lateness} & \textbf{L used} & \textbf{S used} \\
+\midrule
+C20 & \textbf{650.23} & 650.72 & 651.71 & 0.00 & 1 / 3 & 2 / 4 \\
+R20 & \textbf{1,461.86} & 1,461.86 & 1,461.86 & 0.00 & 2 / 3 & 4 / 4 \\
+\bottomrule
+\end{tabular}
+\caption{Final ALNS results (type\_aware init, 2000 iterations / 60s, 3 seeds). L and S used show the number of vehicles used out of the available fleet.}
+\label{tab:final}
+\end{table}
+
+\subsubsection{Best Solution --- C20}
+
+The best solution for C20 (cost = 650.23) uses 1 large and 2 small vehicles:
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Route 1 [L]:} $0 \to 13 \to 17 \to 18 \to 19 \to 15 \to 16 \to 14 \to 12 \to 0$ \quad (load = 190/200, dist = 95.88)
+    \item \textbf{Route 2 [S]:} $0 \to 20 \to 11 \to 9 \to 6 \to 4 \to 2 \to 1 \to 0$ \quad (load = 100/100, dist = 61.57)
+    \item \textbf{Route 3 [S]:} $0 \to 5 \to 3 \to 7 \to 8 \to 10 \to 0$ \quad (load = 70/100, dist = 41.33)
+\end{itemize}
+The large vehicle is used at near-full capacity (95\%) to serve the northern cluster, while the two small vehicles handle the eastern customers. All time windows are satisfied (total lateness = 0).
+
+\subsubsection{Best Solution --- R20}
+
+The best solution for R20 (cost = 1,461.86) uses 2 large and 4 small vehicles:
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Route 1 [L]:} $0 \to 14 \to 15 \to 3 \to 4 \to 0$ \quad (load = 60/200, dist = 145.00)
+    \item \textbf{Route 2 [S]:} $0 \to 5 \to 16 \to 6 \to 13 \to 0$ \quad (load = 71/100, dist = 68.08)
+    \item \textbf{Route 3 [S]:} $0 \to 7 \to 8 \to 17 \to 0$ \quad (load = 16/100, dist = 77.76)
+    \item \textbf{Route 4 [L]:} $0 \to 11 \to 19 \to 10 \to 0$ \quad (load = 45/200, dist = 81.11)
+    \item \textbf{Route 5 [S]:} $0 \to 12 \to 9 \to 20 \to 1 \to 0$ \quad (load = 54/100, dist = 83.40)
+    \item \textbf{Route 6 [S]:} $0 \to 2 \to 18 \to 0$ \quad (load = 19/100, dist = 61.27)
+\end{itemize}
+The random distribution requires more vehicles (6 vs.\ 3 for C20) and results in higher total cost, as expected. All time windows are satisfied.
+
+\subsubsection{Route Visualizations}
+
+Figures~\ref{fig:routes-c20} and~\ref{fig:routes-r20} show the route visualizations for the best solutions.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.75\textwidth]{final_C20_routes.png}
+\caption{Best route configuration for C20 (cost = 650.23). Solid lines: large vehicles; dashed lines: small vehicles.}
+\label{fig:routes-c20}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.75\textwidth]{final_R20_routes.png}
+\caption{Best route configuration for R20 (cost = 1,461.86).}
+\label{fig:routes-r20}
+\end{figure}
+
+\subsubsection{Convergence Behavior}
+
+Figure~\ref{fig:conv} presents the convergence curves for both instances across 3 seeds, showing that the algorithm converges rapidly within the first 200--500 iterations and stabilizes well before the 2000-iteration budget.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.48\textwidth]{final_C20_convergence.png}
+\hfill
+\includegraphics[width=0.48\textwidth]{final_R20_convergence.png}
+\caption{Convergence curves for C20 (left) and R20 (right) over 3 seeds. Log scale (left panels) and zoomed linear scale (right panels).}
+\label{fig:conv}
+\end{figure}
+
+\section{Conclusion}
+
+This work presented a comprehensive Adaptive Large Neighborhood Search (ALNS) metaheuristic for the Heterogeneous Fleet Vehicle Routing Problem with Time Windows (HFVRPTW). The main contributions and findings are:
+
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Algorithm design:} A complete ALNS framework with 5 destroy operators (random, worst, Shaw, route, vehicle-type-aware), 4 repair operators (greedy, regret-2, regret-3, vehicle-type-aware), adaptive roulette-wheel selection, and simulated-annealing acceptance with warm-up-based temperature calibration.
+
+    \item \textbf{Superior performance:} ALNS dramatically outperforms standalone SA (5$\times$ improvement on R20) and construction heuristics (up to 200$\times$ improvement over NN). The destroy/repair paradigm is essential for escaping local optima in heterogeneous fleet routing.
+
+    \item \textbf{Zero lateness:} The algorithm eliminates all time-window violations on both test instances, demonstrating that the soft-penalty mechanism effectively guides the search toward feasibility.
+
+    \item \textbf{Robustness:} Parameter sensitivity analysis shows that the algorithm is robust across reasonable parameter ranges, with only cooling rate requiring careful calibration ($c = 0.997$--$0.998$ optimal for 2000 iterations).
+
+    \item \textbf{Fast convergence:} On 20-customer instances, the algorithm converges in approximately 3--5 seconds (well under the 60-second time limit), making it practical for real-time operational use.
+
+    \item \textbf{Constructor independence:} All five initial solution constructors converge to the same final quality, confirming that ALNS's large-neighbourhood moves can overcome poor starting solutions.
+\end{enumerate}
+
+\subsection{Limitations and Future Work}
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Instance size:} The current evaluation is limited to 20-customer instances. Future work should evaluate scalability on Solomon 50- and 100-customer instances.
+    \item \textbf{Exact comparison:} Comparison with optimal solutions from column-generation-based exact methods would establish the optimality gap.
+    \item \textbf{Richer fleet models:} Extensions to three or more vehicle types, electric vehicles with range constraints, or time-dependent travel times would increase practical applicability.
+    \item \textbf{Machine learning integration:} Learning-based operator selection or initial solution generation could further improve convergence speed.
+\end{itemize}
+
+\section*{References}
+
+\begin{enumerate}[label={[\arabic*]}, leftmargin=*, itemsep=2pt]
+    \item Archetti, C., \& Speranza, M. G. (2014). A survey on matheuristics for routing problems. \textit{EURO Journal on Computational Optimization}, 2(4), 223--246.
+    \item Baldacci, R., Battarra, M., \& Vigo, D. (2008). Routing a heterogeneous fleet of vehicles. In \textit{The Vehicle Routing Problem: Latest Advances and New Challenges}, Springer, 3--27.
+    \item Berger, J., Barkaoui, M., \& Br\"aysy, O. (2003). A route-directed hybrid genetic approach for the VRPTW. \textit{INFOR}, 41(2), 179--194.
+    \item Br\"aysy, O. (2003). A reactive variable neighborhood search for the vehicle-routing problem with time windows. \textit{INFORMS Journal on Computing}, 15(4), 347--368.
+    \item Br\"aysy, O., \& Gendreau, M. (2005a). Vehicle routing problem with time windows, Part I: Route construction and local search algorithms. \textit{Transportation Science}, 39(1), 104--118.
+    \item Br\"aysy, O., \& Gendreau, M. (2005b). Vehicle routing problem with time windows, Part II: Metaheuristics. \textit{Transportation Science}, 39(1), 119--139.
+    \item Demir, E., Bekta\c{s}, T., \& Laporte, G. (2012). An adaptive large neighborhood search heuristic for the pollution-routing problem. \textit{European Journal of Operational Research}, 223(2), 346--359.
+    \item Golden, B. L., Assad, A. A., Levy, L., \& Gheysens, F. G. (1984). The fleet size and mix vehicle routing problem. \textit{Computers \& Operations Research}, 11(1), 49--66.
+    \item Hemmelmayr, V. C., Cordeau, J. F., \& Crainic, T. G. (2012). An adaptive large neighborhood search heuristic for two-echelon vehicle routing problems. \textit{Computers \& Operations Research}, 39(12), 3215--3228.
+    \item Ko\c{c}, \c{C}., Bekta\c{s}, T., Jabali, O., \& Laporte, G. (2016). Thirty years of heterogeneous vehicle routing. \textit{European Journal of Operational Research}, 249(1), 1--21.
+    \item Mancini, S. (2016). A real-life multi depot multi period vehicle routing problem with a heterogeneous fleet: Formulation and adaptive large neighborhood search based matheuristic. \textit{Transportation Research Part C}, 70, 100--112.
+    \item Pisinger, D., \& Ropke, S. (2007). A general heuristic for vehicle routing problems. \textit{Computers \& Operations Research}, 34(8), 2403--2435.
+    \item Ropke, S., \& Pisinger, D. (2006). An adaptive large neighborhood search heuristic for the pickup and delivery problem with time windows. \textit{Transportation Science}, 40(4), 455--472.
+    \item Shaw, P. (1998). Using constraint programming and local search methods to solve vehicle routing problems. In \textit{CP-98}, Springer, 417--431.
+    \item Solomon, M. M. (1987). Algorithms for the vehicle routing and scheduling problems with time window constraints. \textit{Operations Research}, 35(2), 254--265.
+    \item Vidal, T., Crainic, T. G., Gendreau, M., \& Prins, C. (2013). A hybrid genetic algorithm with adaptive diversity management for a large class of vehicle routing problems with time-windows. \textit{Computers \& Operations Research}, 40(1), 475--489.
+    \item Vidal, T., Laporte, G., \& Matl, P. (2020). A concise guide to existing and emerging vehicle routing problem variants. \textit{European Journal of Operational Research}, 286(2), 401--416.
+\end{enumerate}
+
+\end{document}
