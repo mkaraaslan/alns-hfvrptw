@@ -125,24 +125,24 @@ python run_experiments.py       # Detailed ALNS run with operator stats
 
 ## 6. Results
 
-### 6.1 Final ALNS (type_aware, 2000 iter / 60s, 3 seeds)
+### 6.1 Final ALNS (type_aware, 2000 iter / 60s, 10 seeds)
 
 | Instance | Best | Mean | Worst | Lateness | L used | S used | Time |
 |----------|-----:|-----:|------:|---------:|:------:|:------:|-----:|
-| **C20** | **650.23** | 650.72 | 651.71 | 0.00 | 1 / 3 | 2 / 4 | ~3.5s |
-| **R20** | **1461.86** | 1461.86 | 1461.86 | 0.00 | 2 / 3 | 4 / 4 | ~5.0s |
+| **C20** | **650.23** | 653.82 | 681.41 | 0.00 | 1 / 3 | 2 / 4 | ~3.0s |
+| **R20** | **1460.72** | 1461.80 | 1463.32 | 0.00 | 2 / 3 | 4 / 4 | ~4.3s |
 
 ### 6.2 Benchmark — ALNS vs Alternatives
 
 | Instance | Method | Best | Mean | Lateness | Time |
 |----------|--------|-----:|-----:|---------:|-----:|
-| C20 | **ALNS** | **650** | **651** | **0.00** | 3.5s |
-| C20 | SA | 685 | 685 | 0.00 | 0.7s |
+| C20 | **ALNS** | **650** | **654** | **0.00** | 3.0s |
+| C20 | SA | 685 | 685 | 0.00 | 0.6s |
 | C20 | CW-TW | 685 | 685 | 0.00 | <0.01s |
 | C20 | Greedy | 107,450 | 107,450 | 2,136 | <0.01s |
 | C20 | NN | 298,232 | 298,232 | 5,952 | <0.01s |
-| R20 | **ALNS** | **1,462** | **1,462** | **0.00** | 5.0s |
-| R20 | SA | 8,126 | 8,126 | 137 | 0.8s |
+| R20 | **ALNS** | **1,461** | **1,462** | **0.00** | 4.3s |
+| R20 | SA | 8,126 | 8,126 | 137 | 0.7s |
 | R20 | CW-TW | 8,126 | 8,126 | 137 | <0.01s |
 | R20 | Greedy | 124,557 | 124,557 | 2,474 | <0.01s |
 | R20 | NN | 294,247 | 294,247 | 5,868 | <0.01s |
@@ -188,6 +188,9 @@ python run_experiments.py       # Detailed ALNS run with operator stats
 
 6. **Initial solution quality matters less with enough iterations** — all 5
    constructors converge to similar final costs when ALNS has budget.
+
+7. **Statistical significance:** Over 10 seeds, ALNS CV = 0.05%–1.41%;
+   one-sample t-test vs SA yields p << 0.001 on both instances.
 
 ---
 

@@ -12,7 +12,7 @@
             "vehicles_L": 1,
             "vehicles_S": 2,
             "iterations": 2000,
-            "runtime": 3.6170449256896973
+            "runtime": 3.063458204269409
           },
           {
             "seed": 7,
@@ -21,7 +21,7 @@
             "vehicles_L": 1,
             "vehicles_S": 2,
             "iterations": 2000,
-            "runtime": 3.4330310821533203
+            "runtime": 2.9781601428985596
           },
           {
             "seed": 123,
@@ -30,14 +30,82 @@
             "vehicles_L": 1,
             "vehicles_S": 2,
             "iterations": 2000,
-            "runtime": 3.422996997833252
+            "runtime": 2.957838296890259
+          },
+          {
+            "seed": 0,
+            "cost": 680.000475781439,
+            "lateness": 0.0,
+            "vehicles_L": 1,
+            "vehicles_S": 2,
+            "iterations": 2000,
+            "runtime": 3.005262613296509
+          },
+          {
+            "seed": 99,
+            "cost": 651.7074125055319,
+            "lateness": 0.0,
+            "vehicles_L": 1,
+            "vehicles_S": 2,
+            "iterations": 2000,
+            "runtime": 2.968865156173706
+          },
+          {
+            "seed": 2024,
+            "cost": 651.7074125055319,
+            "lateness": 0.0,
+            "vehicles_L": 1,
+            "vehicles_S": 2,
+            "iterations": 2000,
+            "runtime": 2.9647328853607178
+          },
+          {
+            "seed": 314,
+            "cost": 651.905566344638,
+            "lateness": 0.0,
+            "vehicles_L": 1,
+            "vehicles_S": 2,
+            "iterations": 2000,
+            "runtime": 3.048056125640869
+          },
+          {
+            "seed": 55,
+            "cost": 650.231961509061,
+            "lateness": 0.0,
+            "vehicles_L": 1,
+            "vehicles_S": 2,
+            "iterations": 2000,
+            "runtime": 2.942880153656006
+          },
+          {
+            "seed": 1001,
+            "cost": 650.231961509061,
+            "lateness": 0.0,
+            "vehicles_L": 1,
+            "vehicles_S": 2,
+            "iterations": 2000,
+            "runtime": 2.988269090652466
+          },
+          {
+            "seed": 777,
+            "cost": 650.231961509061,
+            "lateness": 0.0,
+            "vehicles_L": 1,
+            "vehicles_S": 2,
+            "iterations": 2000,
+            "runtime": 2.976123809814453
           }
         ],
         "best": 650.231961509061,
-        "mean": 650.7237785078846,
-        "worst": 651.7074125055319,
+        "mean": 653.8188087187978,
+        "worst": 680.000475781439,
+        "std": 9.230634581528802,
+        "cv": 0.014118031568435383,
+        "ci95_lower": 647.2160692799382,
+        "ci95_upper": 660.4215481576573,
+        "n_runs": 10,
         "lateness_mean": 0.0,
-        "runtime_mean": 3.4910243352254233
+        "runtime_mean": 2.9893646478652953
       },
       "SA": {
         "runs": [
@@ -48,7 +116,7 @@
             "vehicles_L": 2,
             "vehicles_S": 1,
             "iterations": 50000,
-            "runtime": 0.7034528255462646
+            "runtime": 0.6288158893585205
           },
           {
             "seed": 7,
@@ -57,7 +125,7 @@
             "vehicles_L": 2,
             "vehicles_S": 1,
             "iterations": 50000,
-            "runtime": 0.7031641006469727
+            "runtime": 0.6293540000915527
           },
           {
             "seed": 123,
@@ -66,14 +134,82 @@
             "vehicles_L": 2,
             "vehicles_S": 1,
             "iterations": 50000,
-            "runtime": 0.7730729579925537
+            "runtime": 0.6255512237548828
+          },
+          {
+            "seed": 0,
+            "cost": 685.3729400643514,
+            "lateness": 0.0,
+            "vehicles_L": 2,
+            "vehicles_S": 1,
+            "iterations": 50000,
+            "runtime": 0.6893789768218994
+          },
+          {
+            "seed": 99,
+            "cost": 685.3729400643514,
+            "lateness": 0.0,
+            "vehicles_L": 2,
+            "vehicles_S": 1,
+            "iterations": 50000,
+            "runtime": 0.23571300506591797
+          },
+          {
+            "seed": 2024,
+            "cost": 685.3729400643514,
+            "lateness": 0.0,
+            "vehicles_L": 2,
+            "vehicles_S": 1,
+            "iterations": 50000,
+            "runtime": 0.6265609264373779
+          },
+          {
+            "seed": 314,
+            "cost": 685.3729400643514,
+            "lateness": 0.0,
+            "vehicles_L": 2,
+            "vehicles_S": 1,
+            "iterations": 50000,
+            "runtime": 0.6339521408081055
+          },
+          {
+            "seed": 55,
+            "cost": 685.3729400643514,
+            "lateness": 0.0,
+            "vehicles_L": 2,
+            "vehicles_S": 1,
+            "iterations": 50000,
+            "runtime": 0.623898983001709
+          },
+          {
+            "seed": 1001,
+            "cost": 685.3729400643514,
+            "lateness": 0.0,
+            "vehicles_L": 2,
+            "vehicles_S": 1,
+            "iterations": 50000,
+            "runtime": 0.6215698719024658
+          },
+          {
+            "seed": 777,
+            "cost": 685.3729400643514,
+            "lateness": 0.0,
+            "vehicles_L": 2,
+            "vehicles_S": 1,
+            "iterations": 50000,
+            "runtime": 0.6298413276672363
           }
         ],
         "best": 685.3729400643514,
         "mean": 685.3729400643514,
         "worst": 685.3729400643514,
+        "std": 0.0,
+        "cv": 0.0,
+        "ci95_lower": 685.3729400643514,
+        "ci95_upper": 685.3729400643514,
+        "n_runs": 10,
         "lateness_mean": 0.0,
-        "runtime_mean": 0.726563294728597
+        "runtime_mean": 0.5944636344909668
       },
       "NN": {
         "runs": [
@@ -84,14 +220,19 @@
             "vehicles_L": 2,
             "vehicles_S": 0,
             "iterations": 0,
-            "runtime": 0.00012111663818359375
+            "runtime": 0.00013494491577148438
           }
         ],
         "best": 298231.6417078468,
         "mean": 298231.6417078468,
         "worst": 298231.6417078468,
+        "std": 0.0,
+        "cv": 0.0,
+        "ci95_lower": 298231.6417078468,
+        "ci95_upper": 298231.6417078468,
+        "n_runs": 1,
         "lateness_mean": 5952.378547670773,
-        "runtime_mean": 0.00012111663818359375
+        "runtime_mean": 0.00013494491577148438
       },
       "CW-TW": {
         "runs": [
@@ -102,14 +243,19 @@
             "vehicles_L": 2,
             "vehicles_S": 1,
             "iterations": 0,
-            "runtime": 0.0003180503845214844
+            "runtime": 0.00035190582275390625
           }
         ],
         "best": 685.3729400643514,
         "mean": 685.3729400643514,
         "worst": 685.3729400643514,
+        "std": 0.0,
+        "cv": 0.0,
+        "ci95_lower": 685.3729400643514,
+        "ci95_upper": 685.3729400643514,
+        "n_runs": 1,
         "lateness_mean": 0.0,
-        "runtime_mean": 0.0003180503845214844
+        "runtime_mean": 0.00035190582275390625
       },
       "Greedy": {
         "runs": [
@@ -120,14 +266,19 @@
             "vehicles_L": 2,
             "vehicles_S": 0,
             "iterations": 0,
-            "runtime": 0.00956416130065918
+            "runtime": 0.008014917373657227
           }
         ],
         "best": 107449.81147073797,
         "mean": 107449.81147073797,
         "worst": 107449.81147073797,
+        "std": 0.0,
+        "cv": 0.0,
+        "ci95_lower": 107449.81147073797,
+        "ci95_upper": 107449.81147073797,
+        "n_runs": 1,
         "lateness_mean": 2136.4271872404993,
-        "runtime_mean": 0.00956416130065918
+        "runtime_mean": 0.008014917373657227
       }
     }
   },
@@ -144,7 +295,7 @@
             "vehicles_L": 2,
             "vehicles_S": 4,
             "iterations": 2000,
-            "runtime": 4.988802671432495
+            "runtime": 4.287824869155884
           },
           {
             "seed": 7,
@@ -153,7 +304,7 @@
             "vehicles_L": 2,
             "vehicles_S": 4,
             "iterations": 2000,
-            "runtime": 4.861778974533081
+            "runtime": 4.154623985290527
           },
           {
             "seed": 123,
@@ -162,14 +313,82 @@
             "vehicles_L": 2,
             "vehicles_S": 4,
             "iterations": 2000,
-            "runtime": 5.022026300430298
+            "runtime": 4.386775016784668
+          },
+          {
+            "seed": 0,
+            "cost": 1460.718260094356,
+            "lateness": 0.0,
+            "vehicles_L": 2,
+            "vehicles_S": 4,
+            "iterations": 2000,
+            "runtime": 4.405459880828857
+          },
+          {
+            "seed": 99,
+            "cost": 1461.8643706580237,
+            "lateness": 0.0,
+            "vehicles_L": 2,
+            "vehicles_S": 4,
+            "iterations": 2000,
+            "runtime": 4.257341146469116
+          },
+          {
+            "seed": 2024,
+            "cost": 1463.536983189184,
+            "lateness": 0.0,
+            "vehicles_L": 2,
+            "vehicles_S": 4,
+            "iterations": 2000,
+            "runtime": 4.164582014083862
+          },
+          {
+            "seed": 314,
+            "cost": 1461.8643706580237,
+            "lateness": 0.0,
+            "vehicles_L": 2,
+            "vehicles_S": 4,
+            "iterations": 2000,
+            "runtime": 4.186213970184326
+          },
+          {
+            "seed": 55,
+            "cost": 1461.8643706580237,
+            "lateness": 0.0,
+            "vehicles_L": 2,
+            "vehicles_S": 4,
+            "iterations": 2000,
+            "runtime": 4.1502580642700195
+          },
+          {
+            "seed": 1001,
+            "cost": 1461.8643706580237,
+            "lateness": 0.0,
+            "vehicles_L": 2,
+            "vehicles_S": 4,
+            "iterations": 2000,
+            "runtime": 4.382832050323486
+          },
+          {
+            "seed": 777,
+            "cost": 1460.718260094356,
+            "lateness": 0.0,
+            "vehicles_L": 2,
+            "vehicles_S": 4,
+            "iterations": 2000,
+            "runtime": 4.177983999252319
           }
         ],
-        "best": 1461.8643706580237,
-        "mean": 1461.8643706580235,
-        "worst": 1461.8643706580237,
+        "best": 1460.718260094356,
+        "mean": 1461.8024097984064,
+        "worst": 1463.536983189184,
+        "std": 0.7736192033731936,
+        "cv": 0.00052922282668824,
+        "ci95_lower": 1461.2490344069688,
+        "ci95_upper": 1462.355785189844,
+        "n_runs": 10,
         "lateness_mean": 0.0,
-        "runtime_mean": 4.957535982131958
+        "runtime_mean": 4.2553894996643065
       },
       "SA": {
         "runs": [
@@ -180,7 +399,7 @@
             "vehicles_L": 1,
             "vehicles_S": 4,
             "iterations": 50000,
-            "runtime": 0.8026530742645264
+            "runtime": 0.771651029586792
           },
           {
             "seed": 7,
@@ -189,7 +408,7 @@
             "vehicles_L": 1,
             "vehicles_S": 4,
             "iterations": 50000,
-            "runtime": 0.7959780693054199
+            "runtime": 0.7065830230712891
           },
           {
             "seed": 123,
@@ -198,14 +417,82 @@
             "vehicles_L": 1,
             "vehicles_S": 4,
             "iterations": 50000,
-            "runtime": 0.7057971954345703
+            "runtime": 0.6324021816253662
+          },
+          {
+            "seed": 0,
+            "cost": 8125.990286602328,
+            "lateness": 137.31042988874162,
+            "vehicles_L": 1,
+            "vehicles_S": 4,
+            "iterations": 50000,
+            "runtime": 0.6270532608032227
+          },
+          {
+            "seed": 99,
+            "cost": 8125.990286602328,
+            "lateness": 137.31042988874162,
+            "vehicles_L": 1,
+            "vehicles_S": 4,
+            "iterations": 50000,
+            "runtime": 0.7048630714416504
+          },
+          {
+            "seed": 2024,
+            "cost": 8125.990286602328,
+            "lateness": 137.31042988874162,
+            "vehicles_L": 1,
+            "vehicles_S": 4,
+            "iterations": 50000,
+            "runtime": 0.7093391418457031
+          },
+          {
+            "seed": 314,
+            "cost": 8125.990286602328,
+            "lateness": 137.31042988874162,
+            "vehicles_L": 1,
+            "vehicles_S": 4,
+            "iterations": 50000,
+            "runtime": 0.7131121158599854
+          },
+          {
+            "seed": 55,
+            "cost": 8125.990286602328,
+            "lateness": 137.31042988874162,
+            "vehicles_L": 1,
+            "vehicles_S": 4,
+            "iterations": 50000,
+            "runtime": 0.706367015838623
+          },
+          {
+            "seed": 1001,
+            "cost": 8125.990286602328,
+            "lateness": 137.31042988874162,
+            "vehicles_L": 1,
+            "vehicles_S": 4,
+            "iterations": 50000,
+            "runtime": 0.7186572551727295
+          },
+          {
+            "seed": 777,
+            "cost": 8125.990286602328,
+            "lateness": 137.31042988874162,
+            "vehicles_L": 1,
+            "vehicles_S": 4,
+            "iterations": 50000,
+            "runtime": 0.6377561092376709
           }
         ],
         "best": 8125.990286602328,
-        "mean": 8125.9902866023285,
+        "mean": 8125.990286602328,
         "worst": 8125.990286602328,
-        "lateness_mean": 137.31042988874162,
-        "runtime_mean": 0.7681427796681722
+        "std": 0.0,
+        "cv": 0.0,
+        "ci95_lower": 8125.990286602328,
+        "ci95_upper": 8125.990286602328,
+        "n_runs": 10,
+        "lateness_mean": 137.3104298887416,
+        "runtime_mean": 0.6927784204483032
       },
       "NN": {
         "runs": [
@@ -216,14 +503,19 @@
             "vehicles_L": 1,
             "vehicles_S": 1,
             "iterations": 0,
-            "runtime": 0.00011801719665527344
+            "runtime": 0.00013208389282226562
           }
         ],
         "best": 294246.53645810316,
         "mean": 294246.53645810316,
         "worst": 294246.53645810316,
+        "std": 0.0,
+        "cv": 0.0,
+        "ci95_lower": 294246.53645810316,
+        "ci95_upper": 294246.53645810316,
+        "n_runs": 1,
         "lateness_mean": 5867.680367322474,
-        "runtime_mean": 0.00011801719665527344
+        "runtime_mean": 0.00013208389282226562
       },
       "CW-TW": {
         "runs": [
@@ -234,14 +526,19 @@
             "vehicles_L": 1,
             "vehicles_S": 4,
             "iterations": 0,
-            "runtime": 0.0003788471221923828
+            "runtime": 0.0003521442413330078
           }
         ],
         "best": 8125.990286602328,
         "mean": 8125.990286602328,
         "worst": 8125.990286602328,
+        "std": 0.0,
+        "cv": 0.0,
+        "ci95_lower": 8125.990286602328,
+        "ci95_upper": 8125.990286602328,
+        "n_runs": 1,
         "lateness_mean": 137.31042988874162,
-        "runtime_mean": 0.0003788471221923828
+        "runtime_mean": 0.0003521442413330078
       },
       "Greedy": {
         "runs": [
@@ -252,14 +549,19 @@
             "vehicles_L": 2,
             "vehicles_S": 0,
             "iterations": 0,
-            "runtime": 0.011510133743286133
+            "runtime": 0.009738922119140625
           }
         ],
         "best": 124556.93237813246,
         "mean": 124556.93237813246,
         "worst": 124556.93237813246,
+        "std": 0.0,
+        "cv": 0.0,
+        "ci95_lower": 124556.93237813246,
+        "ci95_upper": 124556.93237813246,
+        "n_runs": 1,
         "lateness_mean": 2473.6008332166884,
-        "runtime_mean": 0.011510133743286133
+        "runtime_mean": 0.009738922119140625
       }
     }
   }

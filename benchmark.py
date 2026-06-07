@@ -36,7 +36,7 @@ FLEET = FleetConfig(
     Q_S=100.0, F_S=100.0, alpha_S=1.5, m_S=4,
 )
 LATENESS_PENALTY = 50.0
-SEEDS = [42, 7, 123]
+SEEDS = [42, 7, 123, 0, 99, 2024, 314, 55, 1001, 777]
 ALNS_ITERS = 2000
 MAX_TIME = 60.0
 
@@ -81,13 +81,31 @@ def run_sa_multi(inst, seeds):
 
 
 def summarize_runs(runs):
+    import math
     costs = [r["cost"] for r in runs]
+    n = len(costs)
+    mean_c = sum(costs) / n
+    if n > 1:
+        std_c = math.sqrt(sum((c - mean_c) ** 2 for c in costs) / (n - 1))
+        cv_c = std_c / mean_c if mean_c > 0 else 0.0
+        # 95% CI using t-distribution approximation (t ≈ 2.262 for df=9)
+        t_val = 2.262 if n == 10 else (4.303 if n == 3 else 1.96)
+        ci_half = t_val * std_c / math.sqrt(n)
+    else:
+        std_c = 0.0
+        cv_c = 0.0
+        ci_half = 0.0
     return {
         "best": min(costs),
-        "mean": sum(costs) / len(costs),
+        "mean": mean_c,
         "worst": max(costs),
-        "lateness_mean": sum(r["lateness"] for r in runs) / len(runs),
-        "runtime_mean": sum(r["runtime"] for r in runs) / len(runs),
+        "std": std_c,
+        "cv": cv_c,
+        "ci95_lower": mean_c - ci_half,
+        "ci95_upper": mean_c + ci_half,
+        "n_runs": n,
+        "lateness_mean": sum(r["lateness"] for r in runs) / n,
+        "runtime_mean": sum(r["runtime"] for r in runs) / n,
     }
 
 
@@ -152,14 +170,15 @@ def main():
         print(f"done — cost={greedy_sol.cost:.2f}")
 
         # summary table
-        print(f"\n  {'Method':<10} {'Best':>9} {'Mean':>9} {'Worst':>9} "
-              f"{'Late':>7} {'Time(s)':>8}")
-        print(f"  {'-'*55}")
+        print(f"\n  {'Method':<10} {'Best':>9} {'Mean':>9} {'Std':>8} "
+              f"{'CV%':>6} {'95% CI':>20} {'Late':>7} {'Time(s)':>8}")
+        print(f"  {'-'*80}")
         for mname in ["ALNS", "SA", "NN", "CW-TW", "Greedy"]:
             m = results["methods"][mname]
+            ci_str = f"[{m['ci95_lower']:.2f}, {m['ci95_upper']:.2f}]"
             print(f"  {mname:<10} {m['best']:9.2f} {m['mean']:9.2f} "
-                  f"{m['worst']:9.2f} {m['lateness_mean']:7.2f} "
-                  f"{m['runtime_mean']:8.2f}")
+                  f"{m['std']:8.2f} {m['cv']*100:5.2f}% {ci_str:>20} "
+                  f"{m['lateness_mean']:7.2f} {m['runtime_mean']:8.2f}")
 
         all_results.append(results)
 
@@ -174,6 +193,10 @@ def main():
                 "runs": runs_no_hist,
                 "best": mdata["best"], "mean": mdata["mean"],
                 "worst": mdata["worst"],
+                "std": mdata["std"], "cv": mdata["cv"],
+                "ci95_lower": mdata["ci95_lower"],
+                "ci95_upper": mdata["ci95_upper"],
+                "n_runs": mdata["n_runs"],
                 "lateness_mean": mdata["lateness_mean"],
                 "runtime_mean": mdata["runtime_mean"],
             }

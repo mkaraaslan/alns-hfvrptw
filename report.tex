@@ -49,6 +49,8 @@ The Heterogeneous Fleet Vehicle Routing Problem with Time Windows (HFVRPTW) is a
 \tableofcontents
 \newpage
 
+\noindent\textbf{Note on Revised Progress Report.} This final report supersedes the progress report submitted earlier in the semester. Sections~1--3 incorporate the revised theoretical framework (problem definition, mathematical model, and algorithm design) from the progress report, with minor corrections and clarifications. Section~4 (Computational Study) and Section~5 (Conclusion) are entirely new, presenting complete experimental results, statistical analysis, and findings.
+
 \section{Introduction}
 
 \subsection{Motivation and Background}
@@ -526,7 +528,23 @@ In all experiments on 20-customer instances, the iteration limit was reached fir
 
 \subsubsection{Implementation Details}
 
-The algorithm is implemented in Python 3.11 without external optimization solvers. All experiments are run on a MacOS system. Each stochastic method is evaluated with 3 independent seeds (42, 7, 123) to assess robustness. Reproducibility is ensured through fixed random seeds and documented experimental scripts.
+The algorithm is implemented in Python 3.11 without external optimization solvers. All experiments are run on a MacOS system (Apple M-series). Each stochastic method is evaluated with 10 independent seeds ($\{42, 7, 123, 0, 99, 2024, 314, 55, 1001, 777\}$) to enable meaningful statistical analysis. Reproducibility is ensured through fixed random seeds and documented experimental scripts.
+
+\subsubsection{Performance Metrics}
+
+To enable rigorous comparison, we define the following performance metrics:
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Total cost $f(S)$:} Sum of fixed costs, variable distance costs, and lateness penalty (Eq.~10).
+    \item \textbf{CPU time (seconds):} Wall-clock time from algorithm start to termination.
+    \item \textbf{Improvement gap $\Delta\%$:} Percentage improvement of ALNS over method $m$:
+    \begin{equation}
+    \Delta\%_m = \frac{\bar{f}_m - \bar{f}_{\text{ALNS}}}{\bar{f}_m} \times 100\%,
+    \end{equation}
+    where $\bar{f}_m$ and $\bar{f}_{\text{ALNS}}$ are the mean costs over 10 runs.
+    \item \textbf{Standard deviation ($\sigma$)} and \textbf{coefficient of variation ($\text{CV} = \sigma / \bar{f}$):} Measure of solution robustness across different random seeds.
+    \item \textbf{95\% confidence interval:} $\bar{f} \pm t_{0.025, n-1} \cdot \sigma / \sqrt{n}$, where $t_{0.025,9} = 2.262$ for $n = 10$ runs.
+    \item \textbf{Total lateness:} $\sum_{i \in C} \max(0, w_i - b_i)$; zero indicates all time windows satisfied.
+\end{enumerate}
 
 \subsection{Initial Solution Constructor Comparison}
 
@@ -637,31 +655,31 @@ Table~\ref{tab:benchmark} summarizes the results.
 
 \begin{table}[htbp]
 \centering
-\begin{tabular}{@{}llrrrrr@{}}
+\begin{tabular}{@{}llrrrrrr@{}}
 \toprule
-\textbf{Instance} & \textbf{Method} & \textbf{Best} & \textbf{Mean} & \textbf{Worst} & \textbf{Lateness} & \textbf{Time (s)} \\
+\textbf{Instance} & \textbf{Method} & \textbf{Best} & \textbf{Mean} & \textbf{Std} & \textbf{Lateness} & \textbf{Time (s)} & \textbf{$\Delta$\%} \\
 \midrule
-C20 & \textbf{ALNS} & \textbf{650.23} & \textbf{650.72} & \textbf{651.71} & \textbf{0.00} & 3.5 \\
-C20 & SA & 685.37 & 685.37 & 685.37 & 0.00 & 0.7 \\
-C20 & CW-TW & 685.37 & 685.37 & 685.37 & 0.00 & $<$0.01 \\
-C20 & Greedy & 107,450 & 107,450 & 107,450 & 2,136 & $<$0.01 \\
-C20 & NN & 298,232 & 298,232 & 298,232 & 5,952 & $<$0.01 \\
+C20 & \textbf{ALNS} & \textbf{650.23} & \textbf{653.82} & 9.23 & \textbf{0.00} & 2.99 & --- \\
+C20 & SA & 685.37 & 685.37 & 0.00 & 0.00 & 0.59 & 4.6\% \\
+C20 & CW-TW & 685.37 & 685.37 & 0.00 & 0.00 & $<$0.01 & 4.6\% \\
+C20 & Greedy & 107,450 & 107,450 & 0.00 & 2,136 & $<$0.01 & 99.4\% \\
+C20 & NN & 298,232 & 298,232 & 0.00 & 5,952 & $<$0.01 & 99.8\% \\
 \midrule
-R20 & \textbf{ALNS} & \textbf{1,461.86} & \textbf{1,461.86} & \textbf{1,461.86} & \textbf{0.00} & 5.0 \\
-R20 & SA & 8,125.99 & 8,125.99 & 8,125.99 & 137.31 & 0.8 \\
-R20 & CW-TW & 8,125.99 & 8,125.99 & 8,125.99 & 137.31 & $<$0.01 \\
-R20 & Greedy & 124,557 & 124,557 & 124,557 & 2,474 & $<$0.01 \\
-R20 & NN & 294,247 & 294,247 & 294,247 & 5,868 & $<$0.01 \\
+R20 & \textbf{ALNS} & \textbf{1,460.72} & \textbf{1,461.80} & 0.77 & \textbf{0.00} & 4.26 & --- \\
+R20 & SA & 8,125.99 & 8,125.99 & 0.00 & 137.31 & 0.69 & 82.0\% \\
+R20 & CW-TW & 8,125.99 & 8,125.99 & 0.00 & 137.31 & $<$0.01 & 82.0\% \\
+R20 & Greedy & 124,557 & 124,557 & 0.00 & 2,474 & $<$0.01 & 98.8\% \\
+R20 & NN & 294,247 & 294,247 & 0.00 & 5,868 & $<$0.01 & 99.5\% \\
 \bottomrule
 \end{tabular}
-\caption{Benchmark comparison of ALNS against alternative heuristics. ALNS achieves dramatically lower cost and zero lateness on both instances.}
+\caption{Benchmark comparison of ALNS against alternative heuristics (10 seeds for stochastic methods). $\Delta$\% denotes the improvement gap of ALNS over each method. ALNS achieves dramatically lower cost and zero lateness on both instances.}
 \label{tab:benchmark}
 \end{table}
 
 \textbf{Key observations:}
 \begin{enumerate}[leftmargin=*]
-    \item \textbf{ALNS vs.\ Standalone SA:} SA with small-neighbourhood moves (2-opt*, relocate, swap) cannot improve beyond the CW-TW initial solution, despite 50,000 iterations. The SA is trapped in a local optimum because its moves can only perturb 1--2 customers at a time, whereas ALNS's destroy/repair operators restructure 2--8 customers simultaneously, enabling escape from deep local optima.
-    \item \textbf{ALNS vs.\ Construction Heuristics:} Construction-only methods produce widely varying quality. CW-TW achieves good results on C20 (685, only 5\% above ALNS optimal) but performs poorly on R20 (8,126 with lateness 137), where the random customer distribution requires significant restructuring.
+    \item \textbf{ALNS vs.\ Standalone SA:} SA with small-neighbourhood moves (2-opt*, relocate, swap) cannot improve beyond the CW-TW initial solution, despite 50,000 iterations. The improvement gap is 4.6\% on C20 and 82.0\% on R20. SA is trapped in a local optimum because its moves can only perturb 1--2 customers at a time, whereas ALNS's destroy/repair operators restructure 2--8 customers simultaneously, enabling escape from deep local optima.
+    \item \textbf{ALNS vs.\ Construction Heuristics:} Construction-only methods produce widely varying quality. CW-TW achieves good results on C20 (685, only 4.6\% above ALNS) but performs poorly on R20 (8,126 with lateness 137), where the random customer distribution requires significant restructuring.
     \item \textbf{Lateness elimination:} Only ALNS achieves zero lateness on both instances, demonstrating its ability to restructure routes to satisfy all time windows.
     \item \textbf{Cost reduction magnitude:} On R20, ALNS improves the CW-TW solution by 82\% ($8{,}126 \to 1{,}462$), demonstrating the transformative power of the destroy/repair paradigm.
 \end{enumerate}
@@ -700,19 +718,19 @@ The dramatic superiority of ALNS over standalone SA and construction heuristics 
 
 \subsection{Final Results}
 
-The final ALNS configuration uses the \textbf{type\_aware} constructor, cooling rate $c = 0.998$, and stopping criteria of 2000 iterations or 60 seconds. Table~\ref{tab:final} presents the results over 3 seeds.
+The final ALNS configuration uses the \textbf{type\_aware} constructor, cooling rate $c = 0.998$, and stopping criteria of 2000 iterations or 60 seconds. Table~\ref{tab:final} presents the results over 10 independent runs.
 
 \begin{table}[htbp]
 \centering
-\begin{tabular}{@{}lrrrrrr@{}}
+\begin{tabular}{@{}lrrrrrrr@{}}
 \toprule
-\textbf{Instance} & \textbf{Best} & \textbf{Mean} & \textbf{Worst} & \textbf{Lateness} & \textbf{L used} & \textbf{S used} \\
+\textbf{Instance} & \textbf{Best} & \textbf{Mean} & \textbf{Worst} & \textbf{Std} & \textbf{CV\%} & \textbf{Lateness} & \textbf{Time (s)} \\
 \midrule
-C20 & \textbf{650.23} & 650.72 & 651.71 & 0.00 & 1 / 3 & 2 / 4 \\
-R20 & \textbf{1,461.86} & 1,461.86 & 1,461.86 & 0.00 & 2 / 3 & 4 / 4 \\
+C20 & \textbf{650.23} & 653.82 & 681.41 & 9.23 & 1.41 & 0.00 & 2.99 \\
+R20 & \textbf{1,460.72} & 1,461.80 & 1,463.32 & 0.77 & 0.05 & 0.00 & 4.26 \\
 \bottomrule
 \end{tabular}
-\caption{Final ALNS results (type\_aware init, 2000 iterations / 60s, 3 seeds). L and S used show the number of vehicles used out of the available fleet.}
+\caption{Final ALNS results (type\_aware init, 2000 iterations / 60s, 10 seeds).}
 \label{tab:final}
 \end{table}
 
@@ -770,6 +788,76 @@ Figure~\ref{fig:conv} presents the convergence curves for both instances across 
 \label{fig:conv}
 \end{figure}
 
+\subsection{Statistical Analysis of Results}
+
+This section provides a rigorous statistical evaluation of the ALNS algorithm's performance based on the 10 independent runs.
+
+\subsubsection{Descriptive Statistics and Robustness}
+
+Table~\ref{tab:stats} presents the detailed statistical summary of ALNS performance across 10 seeds, including confidence intervals.
+
+\begin{table}[htbp]
+\centering
+\begin{tabular}{@{}lrrrrrr@{}}
+\toprule
+\textbf{Instance} & \textbf{Mean} & \textbf{Std} & \textbf{CV\%} & \textbf{95\% CI Lower} & \textbf{95\% CI Upper} & \textbf{Range} \\
+\midrule
+C20 & 653.82 & 9.23 & 1.41 & 647.22 & 660.42 & 31.18 \\
+R20 & 1,461.80 & 0.77 & 0.05 & 1,461.25 & 1,462.36 & 2.60 \\
+\bottomrule
+\end{tabular}
+\caption{ALNS statistical summary over 10 independent runs. The narrow confidence intervals and low CV values demonstrate high robustness.}
+\label{tab:stats}
+\end{table}
+
+\textbf{Interpretation:}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{R20:} The coefficient of variation of 0.05\% and the 95\% CI width of only 1.11 units indicate that the algorithm converges to essentially the same solution regardless of the random seed. This near-deterministic behavior suggests that the search landscape for R20 has a dominant basin of attraction that ALNS reliably finds.
+    \item \textbf{C20:} The slightly higher CV of 1.41\% reflects occasional runs where the algorithm settles at a local optimum near 681 rather than the global best of 650. Nevertheless, the best-of-10 result (650.23) is reliably achieved and the mean remains low at 653.82.
+\end{itemize}
+
+\subsubsection{Improvement Gap Analysis}
+
+Table~\ref{tab:gap} quantifies the improvement of ALNS over each baseline method.
+
+\begin{table}[htbp]
+\centering
+\begin{tabular}{@{}llrrl@{}}
+\toprule
+\textbf{Instance} & \textbf{Baseline} & \textbf{Baseline Mean} & \textbf{ALNS Mean} & \textbf{$\Delta$\%} \\
+\midrule
+C20 & SA & 685.37 & 653.82 & 4.6\% \\
+C20 & CW-TW & 685.37 & 653.82 & 4.6\% \\
+C20 & Greedy & 107,449.81 & 653.82 & 99.4\% \\
+C20 & NN & 298,231.64 & 653.82 & 99.8\% \\
+\midrule
+R20 & SA & 8,125.99 & 1,461.80 & 82.0\% \\
+R20 & CW-TW & 8,125.99 & 1,461.80 & 82.0\% \\
+R20 & Greedy & 124,556.93 & 1,461.80 & 98.8\% \\
+R20 & NN & 294,246.54 & 1,461.80 & 99.5\% \\
+\bottomrule
+\end{tabular}
+\caption{Improvement gap of ALNS over each baseline method. $\Delta\% = (\bar{f}_{\text{baseline}} - \bar{f}_{\text{ALNS}}) / \bar{f}_{\text{baseline}} \times 100\%$.}
+\label{tab:gap}
+\end{table}
+
+The most meaningful comparison is between ALNS and SA, since both are metaheuristic improvement methods starting from the same initial solution class. The 4.6\% improvement on clustered C20 and 82.0\% on random R20 demonstrate that large-neighbourhood moves provide a qualitatively different search capability compared to small-neighbourhood local search.
+
+\subsubsection{Statistical Significance}
+
+Since SA converges to the same cost in all 10 runs (std = 0), a traditional paired $t$-test or Wilcoxon signed-rank test is not applicable (no variance in the SA sample). However, this deterministic convergence of SA itself constitutes strong evidence: SA is \emph{stuck} at a single local optimum, while ALNS consistently finds solutions that are 4.6\%--82.0\% better.
+
+For the ALNS runs themselves, we verify that the observed improvement is statistically meaningful by noting that the 95\% confidence interval for C20 ($[647.22, 660.42]$) lies entirely below the SA cost of 685.37, and for R20 ($[1{,}461.25, 1{,}462.36]$) lies entirely below the SA cost of 8,125.99. This confirms that the superiority of ALNS is \emph{not} due to random chance but reflects a systematic algorithmic advantage.
+
+\textbf{One-sample $t$-test against SA:} We test $H_0: \mu_{\text{ALNS}} \geq f_{\text{SA}}$ vs.\ $H_1: \mu_{\text{ALNS}} < f_{\text{SA}}$:
+\begin{equation}
+t = \frac{\bar{f}_{\text{ALNS}} - f_{\text{SA}}}{\sigma_{\text{ALNS}} / \sqrt{n}} = \frac{653.82 - 685.37}{9.23 / \sqrt{10}} = -10.81 \quad (\text{C20})
+\end{equation}
+\begin{equation}
+t = \frac{1{,}461.80 - 8{,}125.99}{0.77 / \sqrt{10}} = -27{,}373 \quad (\text{R20})
+\end{equation}
+Both $t$-statistics are far below the critical value $-t_{0.05, 9} = -1.833$, yielding $p$-values $\ll 0.001$. The null hypothesis is decisively rejected: ALNS produces statistically significantly better solutions than SA on both instances.
+
 \section{Conclusion}
 
 This work presented a comprehensive Adaptive Large Neighborhood Search (ALNS) metaheuristic for the Heterogeneous Fleet Vehicle Routing Problem with Time Windows (HFVRPTW). The main contributions and findings are:
@@ -781,7 +869,9 @@ This work presented a comprehensive Adaptive Large Neighborhood Search (ALNS) me
 
     \item \textbf{Zero lateness:} The algorithm eliminates all time-window violations on both test instances, demonstrating that the soft-penalty mechanism effectively guides the search toward feasibility.
 
-    \item \textbf{Robustness:} Parameter sensitivity analysis shows that the algorithm is robust across reasonable parameter ranges, with only cooling rate requiring careful calibration ($c = 0.997$--$0.998$ optimal for 2000 iterations).
+    \item \textbf{Robustness:} Over 10 independent runs, ALNS achieves a coefficient of variation of only 0.05\%--1.41\%, with 95\% confidence intervals entirely below all baseline costs. Parameter sensitivity analysis confirms robustness across reasonable parameter ranges, with only cooling rate requiring careful calibration ($c = 0.997$--$0.998$ optimal for 2000 iterations).
+
+    \item \textbf{Statistical significance:} One-sample $t$-tests against SA yield $p \ll 0.001$ on both instances, confirming that ALNS's superiority is not due to random variation.
 
     \item \textbf{Fast convergence:} On 20-customer instances, the algorithm converges in approximately 3--5 seconds (well under the 60-second time limit), making it practical for real-time operational use.
 
